@@ -7,10 +7,20 @@
 #include<string>
 #include<cstring>
 #include<sstream>
+#include <iterator>
 using namespace std;
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
+
+namespace std {
+    template<typename T>
+    std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {
+        using namespace std;
+        copy(v.begin(), v.end(), ostream_iterator<T>(os, "\n"));
+        return os;
+    }
+}
 
 class SolidObject{
     public:
@@ -132,10 +142,10 @@ class Environment{
     /*
 	string serialize() {
         stringstream s;
-        s << player.serialize();
-        s << opponent.serialize();
+        s << player;
+        s << opponent;
         s << " ";
-        s << walls.size();
+        s << walls;
         s << " ";
         return s.str();
 	}*/

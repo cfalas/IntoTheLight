@@ -2,6 +2,11 @@
 #include<math.h>
 #include<stdio.h>
 #include<algorithm>
+#include<vector>
+#include<string>
+#include<cstring>
+#include<sstream>
+using namespace std;
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
@@ -10,10 +15,12 @@ class SolidObject{
     public:
         Rectangle rec;
         Color color;
+        bool active = true;
 
 	Vector2 midpoint(){
 		return Vector2({rec.x + rec.width / 2, rec.y + rec.height / 2});
 	}
+
 
     bool collides(SolidObject other){
         SolidObject *leftmost = this;
@@ -26,6 +33,11 @@ class SolidObject{
         bool inters_x = leftmost->rec.x + leftmost->rec.width > rightmost->rec.x;
         bool inters_y = upmost->rec.y + upmost->rec.height > downmost->rec.y;
         return inters_x && inters_y;
+    }
+
+    void draw(){
+        if(active)
+        DrawRectangleRec(rec, color);
     }
 };
 
@@ -86,4 +98,59 @@ class Mirror : public SolidObject{
     public:
     bool active;
 	float angle;
+    void draw(){
+	    if(active) DrawRectanglePro(rec, {rec.width/2, rec.height/2}, angle, color);
+    }
+};
+
+class Environment{
+	string serialize() {
+        stringstream s;
+        s << player.serialize();
+        s << opponent.serialize();
+        s << " ";
+        s << walls.size();
+        s << " ";
+        return s.str();
+	}
+    public:
+    Player player;
+    Player opponent;
+    vector<Wall> walls;
+    vector<Mirror> mirrors;
+    
+    Environment(){
+        player.rec.x =  20;
+        player.rec.y = 50;
+        player.rec.width = 20;
+        player.rec.height = 20;
+        player.maxspeed = 5;
+        player.color = BLACK;
+
+        opponent.rec.x =  20;
+        opponent.rec.y = 50;
+        opponent.active = false;
+        opponent.rec.width = 20;
+        opponent.rec.height = 20;
+        opponent.maxspeed = 5;
+        opponent.color = BLUE;
+    }
+
+    void draw(){
+        player.draw();
+        opponent.draw();
+        for(Wall wall : walls) wall.draw();
+        for(Mirror mirror : mirrors) mirror.draw();
+    }
+
+    void merge(Environment opp_env){
+        walls = opp_env.walls;
+        if(opp_env.mirrors.size() > mirrors.size()){
+            mirrors.clear();
+            for(Mirror m : opp_env.mirrors) mirrors.push_back(m);
+        }
+
+        opponent.rec = opp_env.player.rec;
+        opponent.active = true;
+    }
 };

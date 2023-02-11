@@ -51,7 +51,6 @@ class Player : public SolidObject{
             speed.x /= sqrt(2);
             speed.y /= sqrt(2);
         }
-        printf("Speed %f %f Keys %d\n", speed.x, speed.y, numKeys);
     }
 
     void fixCollision(SolidObject other){

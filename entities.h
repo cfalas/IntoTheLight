@@ -94,16 +94,23 @@ class Wall : public SolidObject{
     bool active;
 };
 
-class Mirror : public SolidObject{
+class Mirror {
     public:
     bool active;
 	float angle;
+    Vector2 pos;
+    float length = 50;
     void draw(){
-	    if(active) DrawRectanglePro(rec, {rec.width/2, rec.height/2}, angle, color);
+	    if(active) DrawLine(pos.x, pos.y, pos.x + length/2 * cos(angle), pos.y + length/2*sin(angle), RED);
+        if(active){
+            DrawCircle(pos.x, pos.y, 5, PURPLE);
+            DrawCircle(pos.x + length/2 * cos(angle), pos.y + length/2 * sin(angle), 5, PURPLE);
+        }
     }
 };
 
 class Environment{
+    /*
 	string serialize() {
         stringstream s;
         s << player.serialize();
@@ -112,7 +119,7 @@ class Environment{
         s << walls.size();
         s << " ";
         return s.str();
-	}
+	}*/
     public:
     Player player;
     Player opponent;

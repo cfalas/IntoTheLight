@@ -110,14 +110,11 @@ void InitGame(void)
         e.walls[i].active = true;
         e.walls[i].color = GRAY;
     }
-	adding_mirror.color = RED;
 	adding_mirror.active = true;
-	adding_mirror.rec.width = 60;
-	adding_mirror.rec.height = 2;
+	adding_mirror.length = 60;
 }
 
 int EPS = 5;
-Vector2 mousePosition;
 bool adding = false;
 
 // Update game (one frame)
@@ -128,9 +125,7 @@ void UpdateGame(void)
 		if(!adding){
 			// Place mirror
 			adding = true;
-			mousePosition = GetMousePosition();
-			adding_mirror.rec.x = mousePosition.x;
-			adding_mirror.rec.y = mousePosition.y;
+            adding_mirror.pos = GetMousePosition();
 		}
 		else{
 			// Rotate mirror
@@ -177,7 +172,7 @@ void DrawGame(void)
         {
             e.draw();
 
-			if(adding) DrawRectanglePro(adding_mirror.rec, {adding_mirror.rec.width/2, adding_mirror.rec.height/2}, adding_mirror.angle, adding_mirror.color);
+			if(adding) adding_mirror.draw();
 
             DrawText(TextFormat("%04i", score), 20, 20, 40, GRAY);
 

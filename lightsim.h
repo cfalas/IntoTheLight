@@ -62,22 +62,38 @@ public:
 
     pair<vector<LightFrustrum>, vector<LightFrustrumForSim>> sim(const vector<ObstacleForSim> &obstacles){
         vector<ObstacleForSim> clippedObstacles;
+        //cout<<"sim"<<" "<<foc<<" "<<seg.p1<<" "<<seg.p2<<endl;    
+
         for(auto &obstacle : obstacles){
-            if(pointInside(obstacle.seg.p1) && pointInside(obstacle.seg.p1)) {
+            if(pointInside(obstacle.seg.p1) && pointInside(obstacle.seg.p2)) {
                 clippedObstacles.push_back(obstacle);
             } else {
                 auto p1 = obstacle.seg.p1;
                 auto p2 = obstacle.seg.p2;
-                bool add = false;
-                if(auto newP1 = segInter(obstacle.seg,Segment(seg.p1,(seg.p1-foc)*1000+foc))){
-                    p1 = *newP1;
-                    add = true;
+                bool movedp1 = false;
+                bool movedp2 = false;
+                //cout<<"obs1"<<" "<<obstacle.seg.p1<<" "<<obstacle.seg.p2<<endl;
+                if(auto newP = segInter(obstacle.seg,Segment(seg.p1,(seg.p1-foc)*1000+foc))){
+                    if(!pointInside(p1) && !movedp1){
+                        p1 = *newP;
+                        movedp1 = true;
+                    } else if(!pointInside(p2) && !movedp2){
+                        p2 = *newP;
+                        movedp2 = true;
+                    }
                 }
-                if(auto newP2 = segInter(obstacle.seg,Segment(seg.p2,(seg.p2-foc)*1000+foc))){
-                    p2 = *newP2;
-                    add = true;
+                //cout<<"obs2"<<" "<<p1<<" "<<p2<<endl;
+                if(auto newP = segInter(obstacle.seg,Segment(seg.p2,(seg.p2-foc)*1000+foc))){
+                    if(!pointInside(p1) && !movedp1){
+                        p1 = *newP;
+                        movedp1 = true;
+                    } else if(!pointInside(p2) && !movedp2){
+                        p2 = *newP;
+                        movedp2 = true;
+                    }
                 }
-                if(add){
+                //cout<<"obs3"<<" "<<p1<<" "<<p2<<endl;
+                if(movedp1 || movedp2){
                     clippedObstacles.push_back(ObstacleForSim(Segment(p1,p2), obstacle.type));
                 }
             }
@@ -85,6 +101,7 @@ public:
 
         for(auto &obstacle : clippedObstacles){
             if(foc.cross(obstacle.seg.p1,obstacle.seg.p2)<0) swap(obstacle.seg.p1,obstacle.seg.p2);
+            
         }
 
         sort(clippedObstacles.begin(),clippedObstacles.end(),[=](ObstacleForSim a,ObstacleForSim b) -> bool {
@@ -137,7 +154,7 @@ vector<LightFrustrum> run_light_simulation(vector<ObstacleForSim> obstacles, Lig
     vector<LightFrustrumForSim> lightSims;
     lightSims.push_back(startLight);
 
-    for(int i = 0; i<5;i++){
+    for(int i = 0; i<50;i++){
         vector<LightFrustrumForSim> newlightSims;
         for(auto lightSim : lightSims){
             auto [lightFrustra, lightFrustraForSim] = lightSim.sim(obstacles);

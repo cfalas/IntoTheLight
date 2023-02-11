@@ -147,6 +147,8 @@ vector<LightFrustrum> run_light_simulation(vector<ObstacleForSim> obstacles, Lig
         cout<<lightOutput.size()<<" "<<newlightSims.size()<<endl;
         lightSims = newlightSims;
     }
+
+    return lightOutput;
 }
 
 void test_simulation(){

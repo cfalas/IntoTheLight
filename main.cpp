@@ -113,7 +113,6 @@ void InitGame(void)
         e.walls[i].color = GRAY;
     }
 	adding_mirror.active = true;
-	adding_mirror.length = 60;
 }
 
 int EPS = 5;
@@ -127,17 +126,18 @@ void UpdateGame(void)
 		if(!adding){
 			// Place mirror
 			adding = true;
-            adding_mirror.pos = GetMousePosition();
+            adding_mirror.seg.p1 = Point(GetMousePosition());
+            adding_mirror.seg.p2 = Point(GetMousePosition());
+            adding_mirror.seg.p2.x += 60;
 		}
 		else{
 			// Rotate mirror
-			adding_mirror.angle += GetMouseDelta().x;
+			adding_mirror.seg.rotate(GetMouseDelta().x / 10.0);
 		}
 	}
 	else if(adding){
 		adding = false;
 		e.mirrors.push_back(adding_mirror);
-		adding_mirror.angle = 0;
 	}
     if (!gameOver)
     {
@@ -172,7 +172,7 @@ void UpdateGame(void)
 
         
         for(Mirror mirror : e.mirrors){
-            obstacles.push_back(ObstacleForSim(Segment(Point(mirror.pos.x,mirror.pos.y),Point(mirror.pos.x+10,mirror.pos.y+10)),double_mirror));
+            obstacles.push_back(ObstacleForSim(mirror.seg,double_mirror));
         }
 
         e.lightFrustra = run_light_simulation(obstacles, lightForSim);

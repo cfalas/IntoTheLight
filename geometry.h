@@ -22,6 +22,10 @@ public:
         x=x_;
         y=y_;
     }
+	Point(Vector2 p){
+        x=p.x;
+        y=p.y;
+    }
 	bool operator<(P p) const { return tie(x,y) < tie(p.x,p.y); }
 	bool operator==(P p) const { return tie(x,y)==tie(p.x,p.y); }
 	P operator+(P p) const { return P(x+p.x, y+p.y); }
@@ -54,6 +58,18 @@ public:
     float length(){
         return (p2-p1).dist();
     }
+
+	void rotate(float angle){
+		Point mid = (p1 + p2)/2.0;
+		p1 = p1 - mid;
+		p1 = p1.rotate(angle);
+		p1 = p1 + mid;
+
+		p2 = p2 - mid;
+		p2 = p2.rotate(angle);
+		p2 = p2 + mid;
+
+	}
 };
 
 

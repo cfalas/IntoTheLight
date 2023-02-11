@@ -110,15 +110,9 @@ class Wall : public SolidObject{
 class Mirror {
     public:
     bool active;
-	float angle;
-    Vector2 pos;
-    float length = 50;
+    Segment seg = Segment(Point(), Point());
     void draw(){
-	    if(active) DrawLine(pos.x, pos.y, pos.x + length/2 * cos(angle), pos.y + length/2*sin(angle), RED);
-        if(active){
-            DrawCircle(pos.x, pos.y, 5, PURPLE);
-            DrawCircle(pos.x + length/2 * cos(angle), pos.y + length/2 * sin(angle), 5, PURPLE);
-        }
+	    if(active) DrawLine(seg.p1.x, seg.p1.y, seg.p2.x, seg.p2.y, RED);
     }
 };
 

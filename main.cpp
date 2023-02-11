@@ -18,57 +18,8 @@ using namespace std;
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
 #endif
-
-//----------------------------------------------------------------------------------
-// Some Defines
-//----------------------------------------------------------------------------------
-#define NUM_SHOOTS 50
-#define NUM_MAX_ENEMIES 50
-#define FIRST_WAVE 10
-#define SECOND_WAVE 20
-#define THIRD_WAVE 50
-
-//----------------------------------------------------------------------------------
-// Types and Structures Definition
-//----------------------------------------------------------------------------------
-typedef enum { FIRST = 0, SECOND, THIRD } EnemyWave;
-
-typedef struct Player{
-    Rectangle rec;
-    Vector2 speed;
-    Color color;
-} Player;
-
-typedef struct Enemy{
-    Rectangle rec;
-    Vector2 speed;
-    bool active;
-    Color color;
-} Enemy;
-
-typedef struct Wall{
-    Rectangle rec;
-    bool active;
-    Color color;
-} Wall;
-
-typedef struct Mirror{
-    Rectangle rec;
-    bool active;
-    Color color;
-	float angle;
-
-	Vector2 midpoint(){
-		return Vector2({rec.x + rec.width / 2, rec.y + rec.height / 2});
-	}
-} Mirror;
-
-typedef struct Shoot{
-    Rectangle rec;
-    Vector2 speed;
-    bool active;
-    Color color;
-} Shoot;
+#include "networking.h"
+#include "entities.h"
 
 //------------------------------------------------------------------------------------
 // Global Variables Declaration
@@ -82,13 +33,9 @@ static int score = 0;
 static bool victory = false;
 
 static Player player;
-static Wall walls[NUM_MAX_ENEMIES];
-static EnemyWave wave = { FIRST };
+static vector<Wall> walls;
 
 static float alpha = 0.0f;
-
-static int activeEnemies = 0;
-static bool smooth = false;
 
 static int numWalls = 10;
 
@@ -149,10 +96,8 @@ void InitGame(void)
     pause = false;
     gameOver = false;
     victory = false;
-    smooth = false;
-    wave = FIRST;
-    activeEnemies = FIRST_WAVE;
 	numWalls = 10;
+    walls.assign(10, Wall());
     score = 0;
     alpha = 0;
 
@@ -161,8 +106,7 @@ void InitGame(void)
     player.rec.y = 50;
     player.rec.width = 20;
     player.rec.height = 20;
-    player.speed.x = 5;
-    player.speed.y = 5;
+    player.maxspeed = 5;
     player.color = BLACK;
 
     for (int i = 0; i < numWalls; i++)
@@ -188,6 +132,7 @@ vector<Mirror> mirrors;
 // Update game (one frame)
 void UpdateGame(void)
 {
+    //ws->UpdatePosition(player.rec.x, player.rec.y);
 	if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
 		if(!adding){
 			// Place mirror
@@ -210,31 +155,15 @@ void UpdateGame(void)
     {
 
 		// Player movement
-		if (IsKeyDown(KEY_RIGHT)) player.rec.x += player.speed.x;
-		if (IsKeyDown(KEY_LEFT)) player.rec.x -= player.speed.x;
-		if (IsKeyDown(KEY_UP)) player.rec.y -= player.speed.y;
-		if (IsKeyDown(KEY_DOWN)) player.rec.y += player.speed.y;
+        player.setSpeed();
+        player.move();
 
 		// Player collision with walls
-		for (int i = 0; i < numWalls; i++)
+        for(Wall wall : walls)
 		{
-			if(IsKeyDown(KEY_DOWN) && walls[i].rec.y <= player.rec.y + player.rec.height && 
-					walls[i].rec.y >= player.rec.y &&
-					!(player.rec.x + player.rec.width < walls[i].rec.x || walls[i].rec.x + walls[i].rec.width < player.rec.x))
-				player.rec.y = walls[i].rec.y - player.rec.height;
-			if(IsKeyDown(KEY_UP) && player.rec.y <= walls[i].rec.y + walls[i].rec.height && 
-					player.rec.y >= walls[i].rec.y &&
-					!(player.rec.x + player.rec.width < walls[i].rec.x || walls[i].rec.x + walls[i].rec.width < player.rec.x))
-				player.rec.y = walls[i].rec.y + walls[i].rec.height;
-
-			if(IsKeyDown(KEY_RIGHT) && walls[i].rec.x <= player.rec.x + player.rec.width && 
-					walls[i].rec.x >= player.rec.x &&
-					!(player.rec.y + player.rec.height < walls[i].rec.y || walls[i].rec.y + walls[i].rec.height < player.rec.y))
-				player.rec.x = walls[i].rec.x - player.rec.width;
-			if(IsKeyDown(KEY_LEFT) && player.rec.x <= walls[i].rec.x + walls[i].rec.width && 
-					player.rec.x >= walls[i].rec.x &&
-					!(player.rec.y + player.rec.height < walls[i].rec.y || walls[i].rec.y + walls[i].rec.height < player.rec.y))
-				player.rec.x = walls[i].rec.x + walls[i].rec.width;
+            if(player.collides(wall)){
+                player.fixCollision(wall);
+            }
 		}
 
 		// Edges behaviour

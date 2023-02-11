@@ -7,6 +7,8 @@
 #include<algorithm>
 using namespace std;
 
+#pragma once
+
 EM_BOOL onopen(int eventType, const EmscriptenWebSocketOpenEvent *websocketEvent, void *userData);
 
 EM_BOOL onerror(int eventType, const EmscriptenWebSocketErrorEvent *websocketEvent, void *userData) {

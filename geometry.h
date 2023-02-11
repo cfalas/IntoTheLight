@@ -7,6 +7,7 @@
 
 using namespace std;
 
+#pragma once
 int sgn(float x) { return (x > 0) - (x < 0); }
 
 // typedef struct Vector2 {

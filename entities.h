@@ -13,6 +13,8 @@ using namespace std;
 // Types and Structures Definition
 //----------------------------------------------------------------------------------
 
+#pragma once
+
 namespace std {
     template<typename T>
     std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {

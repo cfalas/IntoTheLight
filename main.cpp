@@ -165,9 +165,9 @@ void UpdateGame(void)
         static const int screenHeight = 450;
         LightFrustrumForSim lightForSim(Point(200,100),Segment(Point(300,200),Point(150,200)));
         vector<ObstacleForSim> obstacles;
-        obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(0,screenHeight)),wall));
-        obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(0,screenHeight)),wall));
-        obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(screenWidth,0)),wall));
+        obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(0,screenHeight)),double_mirror));
+        obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(0,screenHeight)),double_mirror));
+        obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(screenWidth,0)),double_mirror));
         obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(screenWidth,0)),double_mirror));
 
         
@@ -185,7 +185,7 @@ void DrawGame(void)
 {
     BeginDrawing();
 
-        ClearBackground(RAYWHITE);
+        ClearBackground(BLACK);
 
         if (!gameOver)
         {

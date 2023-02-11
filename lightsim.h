@@ -34,8 +34,8 @@ public:
     };
 
     void draw(){
-        cout<<"simfrust"<<endl;
-        cout<<foc<<" "<<seg.p1<<" "<<seg.p2<< (seg.p2-foc)*100+foc<<(seg.p1-foc)*100+foc<<endl;
+        //cout<<"simfrust"<<endl;
+        //cout<<foc<<" "<<seg.p1<<" "<<seg.p2<< (seg.p2-foc)*100+foc<<(seg.p1-foc)*100+foc<<endl;
         DrawCircle(foc.x,foc.y,5,GREEN);
         DrawPolygon(seg.p1,seg.p2, (seg.p2-foc)*100+foc,(seg.p1-foc)*100+foc,{255,255,255,128});
     }
@@ -137,14 +137,14 @@ vector<LightFrustrum> run_light_simulation(vector<ObstacleForSim> obstacles, Lig
     vector<LightFrustrumForSim> lightSims;
     lightSims.push_back(startLight);
 
-    for(int i = 0; i<3;i++){
+    for(int i = 0; i<5;i++){
         vector<LightFrustrumForSim> newlightSims;
         for(auto lightSim : lightSims){
             auto [lightFrustra, lightFrustraForSim] = lightSim.sim(obstacles);
             for(auto x: lightFrustra) lightOutput.push_back(x);
             for(auto x: lightFrustraForSim) newlightSims.push_back(x);
         }
-        cout<<lightOutput.size()<<" "<<newlightSims.size()<<endl;
+        //cout<<lightOutput.size()<<" "<<newlightSims.size()<<endl;
         lightSims = newlightSims;
     }
 
@@ -158,9 +158,9 @@ void test_simulation(){
     LightFrustrumForSim lightForSim(Point(200,100),Segment(Point(300,200),Point(150,200)));
     vector<ObstacleForSim> obstacles;
     obstacles.push_back(ObstacleForSim(Segment(Point(150,310),Point(120,300)),double_mirror));
-    obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(0,screenHeight)),wall));
-    obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(0,screenHeight)),wall));
-    obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(screenWidth,0)),wall));
+    obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(0,screenHeight)),double_mirror));
+    obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(0,screenHeight)),double_mirror));
+    obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(screenWidth,0)),double_mirror));
     obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(screenWidth,0)),double_mirror));
 
     vector<LightFrustrum> lightOutput = run_light_simulation(obstacles, lightForSim);

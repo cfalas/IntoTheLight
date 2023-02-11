@@ -12,6 +12,8 @@
 ********************************************************************************************/
 
 #include "raylib.h"
+#include "lightsim.h"
+#include "entities.h"
 #include<vector>
 using namespace std;
 
@@ -162,6 +164,23 @@ void UpdateGame(void)
 		if (e.player.rec.x + e.player.rec.width >= screenWidth) e.player.rec.x = screenWidth - e.player.rec.width;
 		if (e.player.rec.y <= 0) e.player.rec.y = 0;
 		if (e.player.rec.y + e.player.rec.height >= screenHeight) e.player.rec.y = screenHeight - e.player.rec.height;
+
+
+        static const int screenWidth = 800;
+        static const int screenHeight = 450;
+        LightFrustrumForSim lightForSim(Point(200,100),Segment(Point(300,200),Point(150,200)));
+        vector<ObstacleForSim> obstacles;
+        obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(0,screenHeight)),wall));
+        obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(0,screenHeight)),wall));
+        obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(screenWidth,0)),wall));
+        obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(screenWidth,0)),double_mirror));
+
+        
+        for(Mirror mirror : e.mirrors){
+            obstacles.push_back(ObstacleForSim(Segment(Point(mirror.rec.x,mirror.rec.y),Point(mirror.rec.x+mirror.rec.width,mirror.rec.y+mirror.rec.height)),double_mirror));
+        }
+
+        e.lightFrustra = run_light_simulation(obstacles, lightForSim);
 
 	}
 }

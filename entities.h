@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "geometry.h"
 #include<math.h>
 #include<stdio.h>
 #include<algorithm>
@@ -103,21 +104,40 @@ class Mirror : public SolidObject{
     }
 };
 
+void DrawPolygon(Point a, Point b,Point c,Point d, Color color){
+    DrawTriangle(a,b,c,color);
+    DrawTriangle(c,d,a,color);
+}
+class LightFrustrum {
+public:
+    Point foc;
+    Segment seg1;
+    Segment seg2;
+    LightFrustrum(Point foc,Segment seg1,Segment seg2) : foc(foc),seg1(seg1),seg2(seg2){};
+    
+    void draw(){
+        //cout<<foc<<" "<<seg1.p1<<" "<<seg1.p2<<" "<<seg2.p1<<" "<<seg2.p2<<endl;
+        DrawCircle(foc.x,foc.y,5,BLUE);
+        DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{255,255,255,128});
+    }
+};
+
 class Environment{
-	string serialize() {
-        stringstream s;
-        s << player.serialize();
-        s << opponent.serialize();
-        s << " ";
-        s << walls.size();
-        s << " ";
-        return s.str();
-	}
+	// string serialize() {
+    //     stringstream s;
+    //     s << player.serialize();
+    //     s << opponent.serialize();
+    //     s << " ";
+    //     s << walls.size();
+    //     s << " ";
+    //     return s.str();
+	// }
     public:
     Player player;
     Player opponent;
     vector<Wall> walls;
     vector<Mirror> mirrors;
+    vector<LightFrustrum> lightFrustra;
     
     Environment(){
         player.rec.x =  20;
@@ -141,6 +161,7 @@ class Environment{
         opponent.draw();
         for(Wall wall : walls) wall.draw();
         for(Mirror mirror : mirrors) mirror.draw();
+        for(LightFrustrum light : lightFrustra) light.draw();
     }
 
     void merge(Environment opp_env){

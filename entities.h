@@ -59,7 +59,7 @@ public:
     
     void draw(unsigned char i){
         //cout<<foc<<" "<<seg1.p1<<" "<<seg1.p2<<" "<<seg2.p1<<" "<<seg2.p2<<endl;
-        DrawCircle(foc.x,foc.y,5,BLUE);
+        //DrawCircle(foc.x,foc.y,5,BLUE);
         DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,i,i,i});
         //DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,i,i,i});
     }
@@ -240,8 +240,8 @@ class Environment{
     vector<LightFrustrum> lightFrustra;
     
     Environment(){
-        player.rec.x =  20;
-        player.rec.y = 50;
+        player.rec.x =  200;
+        player.rec.y = 200;
         player.rec.width = 20;
         player.rec.height = 20;
         player.maxspeed = 5;

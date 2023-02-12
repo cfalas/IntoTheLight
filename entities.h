@@ -131,11 +131,15 @@ class SolidObject{
 };
 
 class Player : public SolidObject{
+    int maxhealth = 300;
     public:
+    int health = maxhealth;
     Vector2 speed;
     float maxspeed;
-    int health = 300;
-
+    
+    float getHealth(){
+        return (float)health / maxhealth;
+    }
     void move(){
         rec.x += speed.x;
         rec.y += speed.y;

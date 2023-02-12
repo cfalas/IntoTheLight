@@ -44,8 +44,10 @@ std::istream& operator>>(std::istream& is, Color &c){
     return is;
 }
 
-
-void DrawPolygon(Point a, Point b,Point c,Point d, Color color);
+void DrawPolygon(Point a, Point b,Point c,Point d, Color color){
+    DrawTriangle(a,b,c,color);
+    DrawTriangle(c,d,a,color);
+}
 
 class LightFrustrum {
 public:
@@ -59,7 +61,7 @@ public:
         //cout<<foc<<" "<<seg1.p1<<" "<<seg1.p2<<" "<<seg2.p1<<" "<<seg2.p2<<endl;
         DrawCircle(foc.x,foc.y,5,BLUE);
         DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,i,i,i});
-        DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,i,i,i});
+        //DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,i,i,i});
     }
     friend std::ostream& operator<<(std::ostream& os, const LightFrustrum m){
         os << m.seg1.p1.x<<" "<<m.seg1.p1.y << " " << m.seg1.p2.x<<" "<<m.seg1.p2.y << " ";
@@ -181,8 +183,6 @@ class Player : public SolidObject{
             if(other.rec.y > rec.y) rec.y = other.rec.y - rec.height;
             else rec.y = other.rec.y + other.rec.height;
         }
-
-
     }
 };
 
@@ -210,10 +210,6 @@ class Mirror {
     }
 };
 
-void DrawPolygon(Point a, Point b,Point c,Point d, Color color){
-    DrawTriangle(a,b,c,color);
-    DrawTriangle(c,d,a,color);
-}
 
 
 class Environment;
@@ -236,7 +232,7 @@ class Environment{
         player.rec.width = 20;
         player.rec.height = 20;
         player.maxspeed = 5;
-        player.color = WHITE;
+        player.color = GRAY;
 
         opponent.rec.x =  20;
         opponent.rec.y = 50;

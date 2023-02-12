@@ -1,5 +1,5 @@
 #version 100
-#define MAX_FOCUSPOINTS
+#define MAX_FOCUSPOINTS 100
 
 precision mediump float;
 

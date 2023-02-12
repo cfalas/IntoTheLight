@@ -216,9 +216,13 @@ void UpdateGame(void)
                 obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y + w.rec.height), Point(w.rec.x + w.rec.width, w.rec.y + w.rec.height)), wall));
                 obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y), Point(w.rec.x, w.rec.y + w.rec.height)), wall));
             }
+            obstacles.push_back(ObstacleForSim(Segment(Point(e.opponent.rec.x, e.opponent.rec.y), Point(e.opponent.rec.x + e.opponent.rec.width, e.opponent.rec.y)), wall));
+            obstacles.push_back(ObstacleForSim(Segment(Point(e.opponent.rec.x + e.opponent.rec.width, e.opponent.rec.y), Point(e.opponent.rec.x + e.opponent.rec.width, e.opponent.rec.y + e.opponent.rec.height)), wall));
+            obstacles.push_back(ObstacleForSim(Segment(Point(e.opponent.rec.x, e.opponent.rec.y + e.opponent.rec.height), Point(e.opponent.rec.x + e.opponent.rec.width, e.opponent.rec.y + e.opponent.rec.height)), wall));
+            obstacles.push_back(ObstacleForSim(Segment(Point(e.opponent.rec.x, e.opponent.rec.y), Point(e.opponent.rec.x, e.opponent.rec.y + e.opponent.rec.height)), wall));
 
 
-            obstacles.push_back(ObstacleForSim(adding_mirror.seg,double_mirror));
+            // obstacles.push_back(ObstacleForSim(adding_mirror.seg,double_mirror));
 
             e.lightFrustra = run_light_simulation(obstacles, lightForSim);
 
@@ -238,8 +242,12 @@ void DrawGame(void)
             e.draw();
 
 			if(adding_mirror.active) adding_mirror.draw();
+            
+            DrawRectangleLinesEx({20, 20, screenWidth / 4, 20}, 5, {0, 0,0,120});
+            DrawRectangle(20, 20, screenWidth / 4 * e.player.getHealth(), 20, {255, 0,0,120});
 
-            DrawText(TextFormat("%04i", score), 20, 20, 40, GRAY);
+            DrawRectangleLinesEx({screenWidth * 3 / 4 - 20, 20, screenWidth / 4, 20}, 5, {0, 0,0,120});
+            DrawRectangle(screenWidth - 20 - screenWidth * e.opponent.getHealth() / 4, 20, screenWidth / 4 * e.opponent.getHealth(), 20, {255, 0,0,120});
 
             if (victory) DrawText("YOU WIN", screenWidth/2 - MeasureText("YOU WIN", 40)/2, screenHeight/2 - 40, 40, BLACK);
 

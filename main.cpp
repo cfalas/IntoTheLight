@@ -65,11 +65,11 @@ int main(void)
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(screenWidth, screenHeight, "classic game: space invaders");
 
-    InitAudioDevice();              // Initialize audio device
+    //InitAudioDevice();              // Initialize audio device
 
-    Music music = LoadMusicStream("resources/soundtrack.mp3");
+    // Music music = LoadMusicStream("resources/soundtrack.mp3");
 
-    PlayMusicStream(music);
+    // PlayMusicStream(music);
 
     e.lightShader = LoadShader("resources/shaders/base.vs","resources/shaders/base.fs");
     for(int i = 0;i<100;i++){
@@ -81,7 +81,16 @@ int main(void)
     socket = Websocket(&e);
     socket.ConnectServer();
 
-#if defined(PLATFORM_WEB)
+#if defined(PLATFORM_WEB# # # # . .
+# @ @ # . .
+. # @ @ # .
+. . # @ # .
+. . # @ # .
+. . . # @ #
+. . . # @ #
+. . . # @ *
+. . . # # *
+. . . . . .)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
 #else
     SetTargetFPS(60);

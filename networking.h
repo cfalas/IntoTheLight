@@ -50,7 +50,7 @@ class Websocket{
     }
     void ConnectServer(){
 	    EmscriptenWebSocketCreateAttributes ws_attrs = {
-			"ws://10.248.98.120:8765/",
+			"ws://213.133.90.205:8765/",
 			NULL,
 			EM_TRUE
 		};

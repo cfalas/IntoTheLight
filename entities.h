@@ -267,15 +267,17 @@ class Environment{
         BeginTextureMode(light_mask);
         ClearBackground({0,0,0,255});
         BeginShaderMode(lightShader);
-        BeginBlendMode(BLEND_ADDITIVE);
+        BeginBlendMode(BLEND_ALPHA);
         // rlSetBlendFactors(RLGL_SRC_ALPHA, RLGL_SRC_ALPHA, RLGL_MIN);
         // rlSetBlendMode(BLEND_CUSTOM);
         for(int i = 0; i < lightFrustra.size(); i++){
             lightFrustra[i].draw(i);
         }
+        
         EndBlendMode();
         EndShaderMode();
         opponent.draw();
+        DrawCircleGradient(player.midpoint().x,player.midpoint().y, 100, {255,255,255,50}, {255,255,255,0});
         EndTextureMode();
         BeginBlendMode(BLEND_MULTIPLIED);
         DrawTextureRec(light_mask.texture, (Rectangle){ 0, 0, (float)GetScreenWidth(), -(float)GetScreenHeight() }, {0,0}, WHITE);

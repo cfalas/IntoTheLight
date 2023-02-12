@@ -113,7 +113,7 @@ void InitGame(void)
         wall.color = DARKGRAY;
         e.walls.insert(wall);
     }
-	adding_mirror.active = true;
+	adding_mirror.active = false;
 }
 
 int EPS = 5;
@@ -163,6 +163,19 @@ void UpdateGame(void)
             }
 		}
 
+        for(LightFrustrum light : e.lightFrustra){
+            if(e.player.inside(light)){
+                e.player.damage();
+            }
+        }
+
+        if(!e.player.alive()){
+            gameOver = true;
+        }
+        if(!e.opponent.alive()){
+            victory = true;
+        }
+
 		// Edges behaviour
 		if (e.player.rec.x <= 0) e.player.rec.x = 0;
 		if (e.player.rec.x + e.player.rec.width >= screenWidth) e.player.rec.x = screenWidth - e.player.rec.width;
@@ -176,12 +189,12 @@ void UpdateGame(void)
         obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(0,screenHeight)),wall));
         obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(screenWidth,0)),wall));
         obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(screenWidth,0)),wall));
-        for(Wall w : e.walls){
+/*         for(Wall w : e.walls){
             obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y), Point(w.rec.x + w.rec.width, w.rec.y)), wall));
             obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x + w.rec.width, w.rec.y), Point(w.rec.x + w.rec.width, w.rec.y + w.rec.height)), wall));
             obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y + w.rec.height), Point(w.rec.x + w.rec.width, w.rec.y + w.rec.height)), wall));
             obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y), Point(w.rec.x, w.rec.y + w.rec.height)), wall));
-        }
+        } */
 
         
         for(Mirror mirror : e.mirrors){

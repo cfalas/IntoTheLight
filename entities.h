@@ -44,6 +44,35 @@ std::istream& operator>>(std::istream& is, Color &c){
     return is;
 }
 
+
+void DrawPolygon(Point a, Point b,Point c,Point d, Color color);
+
+class LightFrustrum {
+public:
+    Point foc;
+    Segment seg1;
+    Segment seg2;
+    LightFrustrum(Point foc,Segment seg1,Segment seg2) : foc(foc),seg1(seg1),seg2(seg2){};
+    LightFrustrum() : seg1(Point(0, 0), Point(0, 0)),seg2(Point(0, 0), Point(0, 0)){};
+    
+    void draw(){
+        DrawCircle(foc.x,foc.y,5,BLUE);
+        DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{255,255,255,128});
+    }
+    friend std::ostream& operator<<(std::ostream& os, const LightFrustrum m){
+        os << m.seg1.p1.x<<" "<<m.seg1.p1.y << " " << m.seg1.p2.x<<" "<<m.seg1.p2.y << " ";
+        os << m.seg2.p1.x<<" "<<m.seg2.p1.y << " " << m.seg2.p2.x<<" "<<m.seg2.p2.y << " ";
+        os << m.foc.x << " "<< m.foc.y;
+        return os;
+    }
+    friend std::istream& operator>>(std::istream& is, LightFrustrum &m){
+        is >> m.seg1.p1.x >> m.seg1.p1.y >> m.seg1.p2.x >> m.seg1.p2.y;
+        is >> m.seg2.p1.x >> m.seg2.p1.y >> m.seg2.p2.x >> m.seg2.p2.y;
+        is >> m.foc.x >> m.foc.y;
+        return is;
+    }
+};
+
 class SolidObject{
     public:
         Rectangle rec;
@@ -67,6 +96,21 @@ class SolidObject{
         bool inters_y = upmost->rec.y + upmost->rec.height > downmost->rec.y;
         return inters_x && inters_y;
     }
+    bool inside(LightFrustrum other){
+        vector<Point> inside_pts = {Point(rec.x, rec.y), Point(rec.x, rec.y+rec.height), Point(rec.x+rec.width, rec.y), Point(rec.x+rec.width, rec.y+rec.height)};
+        vector<Segment> outside_segs = {other.seg1, Segment(other.seg1.p2, other.seg2.p2), Segment(other.seg2.p2, other.seg2.p1), Segment(other.seg2.p1, other.seg1.p1)};
+        for(Point pt : inside_pts){
+            bool found = false;
+            for(Segment seg : outside_segs){
+                //printf("Point (%f %f) in terms of Seg (%f %f) (%f %f): %d\n", pt.x, pt.y, seg.p1.x, seg.p1.y, seg.p2.x, seg.p2.y, seg.sideOf(pt));
+                if(seg.sideOf(pt)!=-1) found = true;
+            }
+            //printf("---------------\n");
+            if(!found) return true;
+
+        }
+        return false;
+    }
 
     void draw(){
         if(active)
@@ -86,10 +130,20 @@ class Player : public SolidObject{
     public:
     Vector2 speed;
     float maxspeed;
+    int health = 300;
 
     void move(){
         rec.x += speed.x;
         rec.y += speed.y;
+    }
+
+    bool alive(){
+        return health > 0;
+    }
+
+    void damage(){
+        health--;
+        printf("Health %d\n", health);
     }
 
     void setSpeed(){
@@ -158,32 +212,6 @@ void DrawPolygon(Point a, Point b,Point c,Point d, Color color){
     DrawTriangle(a,b,c,color);
     DrawTriangle(c,d,a,color);
 }
-class LightFrustrum {
-public:
-    Point foc;
-    Segment seg1;
-    Segment seg2;
-    LightFrustrum(Point foc,Segment seg1,Segment seg2) : foc(foc),seg1(seg1),seg2(seg2){};
-    LightFrustrum() : seg1(Point(0, 0), Point(0, 0)),seg2(Point(0, 0), Point(0, 0)){};
-    
-    void draw(){
-        //cout<<foc<<" "<<seg1.p1<<" "<<seg1.p2<<" "<<seg2.p1<<" "<<seg2.p2<<endl;
-        DrawCircle(foc.x,foc.y,5,BLUE);
-        DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{255,255,255,128});
-    }
-    friend std::ostream& operator<<(std::ostream& os, const LightFrustrum m){
-        os << m.seg1.p1.x<<" "<<m.seg1.p1.y << " " << m.seg1.p2.x<<" "<<m.seg1.p2.y << " ";
-        os << m.seg2.p1.x<<" "<<m.seg2.p1.y << " " << m.seg2.p2.x<<" "<<m.seg2.p2.y << " ";
-        os << m.foc.x << " "<< m.foc.y;
-        return os;
-    }
-    friend std::istream& operator>>(std::istream& is, LightFrustrum &m){
-        is >> m.seg1.p1.x >> m.seg1.p1.y >> m.seg1.p2.x >> m.seg1.p2.y;
-        is >> m.seg2.p1.x >> m.seg2.p1.y >> m.seg2.p2.x >> m.seg2.p2.y;
-        is >> m.foc.x >> m.foc.y;
-        return is;
-    }
-};
 
 
 class Environment;

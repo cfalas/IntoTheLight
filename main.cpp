@@ -65,6 +65,12 @@ int main(void)
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(screenWidth, screenHeight, "classic game: space invaders");
 
+    InitAudioDevice();              // Initialize audio device
+
+    Music music = LoadMusicStream("resources/soundtrack.mp3");
+
+    PlayMusicStream(music);
+
     e.lightShader = LoadShader("resources/shaders/base.vs","resources/shaders/base.fs");
     for(int i = 0;i<100;i++){
         e.lightShaderFocusLocs.push_back(GetShaderLocation(e.lightShader, TextFormat("focuspoints[%i]\0",i)));
@@ -82,6 +88,7 @@ int main(void)
 
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
+        UpdateMusicStream(music);
         UpdateDrawFrame();
     }
 #endif

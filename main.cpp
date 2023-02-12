@@ -214,7 +214,7 @@ void UpdateGame(void)
             // e.mirrors.push_back(mirror);
             // mirror.seg = Segment(Point(450,450), Point(450,500));
             // e.mirrors.push_back(mirror);
-            LightFrustrumForSim lightForSim(Point(200,100),Segment(Point(300,200),Point(150,200)));
+            LightFrustrumForSim lightForSim(Point(400,-200),Segment(Point(500,100),Point(350,100)));
             vector<ObstacleForSim> obstacles;
             obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(0,screenHeight)),wall));
             obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(0,screenHeight)),wall));

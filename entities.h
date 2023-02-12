@@ -184,6 +184,14 @@ class Player : public SolidObject{
             else rec.y = other.rec.y + other.rec.height;
         }
     }
+    friend std::ostream& operator<<(std::ostream& os, const Player p) {
+        os << p.rec<<" "<<p.color<<" "<<p.health;
+        return os;
+    }
+    friend std::istream& operator>>(std::istream& is, Player &p) {
+        is >> p.rec >> p.color >> p.health;
+        return is;
+    }
 };
 
 class Wall : public SolidObject{
@@ -240,12 +248,11 @@ class Environment{
         opponent.rec.width = 20;
         opponent.rec.height = 20;
         opponent.maxspeed = 5;
-        opponent.color = BLUE;
+        opponent.color = {50,50,50,255};
     }
 
     void draw(){
         player.draw();
-        opponent.draw();
         for(Wall wall : walls) wall.draw();
         for(Mirror mirror : mirrors) mirror.draw();
         
@@ -263,6 +270,7 @@ class Environment{
         }
         EndBlendMode();
         EndShaderMode();
+        opponent.draw();
         EndTextureMode();
         BeginBlendMode(BLEND_MULTIPLIED);
         DrawTextureRec(render_mask.texture, (Rectangle){ 0, 0, (float)GetScreenWidth(), -(float)GetScreenHeight() }, {0,0}, WHITE);
@@ -282,6 +290,7 @@ class Environment{
         }
 
         opponent.rec = opp_env.player.rec;
+        opponent.health = opp_env.player.health;
         opponent.active = true;
     }
 

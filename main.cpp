@@ -209,6 +209,15 @@ void UpdateGame(void)
             for(Mirror mirror : e.mirrors){
                 obstacles.push_back(ObstacleForSim(mirror.seg,double_mirror));
             }
+
+            for(Wall w : e.walls){
+                obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y), Point(w.rec.x + w.rec.width, w.rec.y)), wall));
+                obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x + w.rec.width, w.rec.y), Point(w.rec.x + w.rec.width, w.rec.y + w.rec.height)), wall));
+                obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y + w.rec.height), Point(w.rec.x + w.rec.width, w.rec.y + w.rec.height)), wall));
+                obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y), Point(w.rec.x, w.rec.y + w.rec.height)), wall));
+            }
+
+
             obstacles.push_back(ObstacleForSim(adding_mirror.seg,double_mirror));
 
             e.lightFrustra = run_light_simulation(obstacles, lightForSim);

@@ -57,10 +57,10 @@ public:
     LightFrustrum(Point foc,Segment seg1,Segment seg2) : foc(foc),seg1(seg1),seg2(seg2){};
     LightFrustrum() : seg1(Point(0, 0), Point(0, 0)),seg2(Point(0, 0), Point(0, 0)){};
     
-    void draw(unsigned char i){
+    void draw(unsigned char i, unsigned char color){
         //cout<<foc<<" "<<seg1.p1<<" "<<seg1.p2<<" "<<seg2.p1<<" "<<seg2.p2<<endl;
         //DrawCircle(foc.x,foc.y,5,BLUE);
-        DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,i,i,i});
+        DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,color,0,255});
         //DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,i,i,i});
     }
     friend std::ostream& operator<<(std::ostream& os, const LightFrustrum m){
@@ -236,8 +236,10 @@ class Environment{
     Player player;
     Player opponent;
     set<Wall> walls;
-    vector<Mirror> mirrors;
-    vector<LightFrustrum> lightFrustra;
+    vector<Mirror> myMirrors;
+    vector<LightFrustrum> myLightFrustra;
+    vector<Mirror> oppMirrors;
+    vector<LightFrustrum> oppLightFrustra;
     
     Environment(){
         player.rec.x =  200;
@@ -256,27 +258,31 @@ class Environment{
         opponent.color = {50,50,50,255};
     }
 
+    void drawLightFrustra(vector<LightFrustrum> &lightFrustra, int color){
+        for(int i = 0; i < lightFrustra.size(); i++){
+            SetShaderValue(lightShader, lightShaderFocusLocs[i], (float[2]){ lightFrustra[i].foc.x,lightFrustra[i].foc.y }, SHADER_UNIFORM_VEC2);
+        }
+        BeginShaderMode(lightShader);
+        BeginBlendMode(BLEND_ALPHA);
+        // rlSetBlendFactors(RLGL_SRC_ALPHA, RLGL_SRC_ALPHA, RLGL_MIN);
+        // rlSetBlendMode(BLEND_CUSTOM);
+        for(int i = 0; i < lightFrustra.size(); i++){
+            lightFrustra[i].draw(i,color);
+        }
+        EndBlendMode();
+        EndShaderMode();
+    }
+
     void draw(){
         player.draw();
         opponent.draw();
         for(Wall wall : walls) wall.draw();
         for(Mirror mirror : mirrors) mirror.draw();
         
-        for(int i = 0; i < lightFrustra.size(); i++){
-            SetShaderValue(lightShader, lightShaderFocusLocs[i], (float[2]){ lightFrustra[i].foc.x,lightFrustra[i].foc.y }, SHADER_UNIFORM_VEC2);
-        }
         BeginTextureMode(light_mask);
         ClearBackground({0,0,0,255});
-        BeginShaderMode(lightShader);
-        BeginBlendMode(BLEND_ALPHA);
-        // rlSetBlendFactors(RLGL_SRC_ALPHA, RLGL_SRC_ALPHA, RLGL_MIN);
-        // rlSetBlendMode(BLEND_CUSTOM);
-        for(int i = 0; i < lightFrustra.size(); i++){
-            lightFrustra[i].draw(i);
-        }
-        
-        EndBlendMode();
-        EndShaderMode();
+        drawLightFrustra(myLightFrustra);
+        drawLightFrustra(oppLightFrustra);
         opponent.draw();
         DrawCircleGradient(player.midpoint().x,player.midpoint().y, 100, {255,255,255,50}, {255,255,255,0});
         EndTextureMode();

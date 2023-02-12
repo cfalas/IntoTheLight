@@ -236,6 +236,7 @@ class Environment{
     Player player;
     Player opponent;
     set<Wall> walls;
+    set<Wall> backgroundWalls;
     vector<Mirror> mirrors;
     vector<LightFrustrum> lightFrustra;
     
@@ -260,7 +261,8 @@ class Environment{
         player.draw();
         opponent.draw();
         for(Wall wall : walls) wall.draw();
-        
+        for(Wall wall : backgroundWalls) wall.draw();
+
         for(int i = 0; i < lightFrustra.size(); i++){
             SetShaderValue(lightShader, lightShaderFocusLocs[i], (float[2]){ lightFrustra[i].foc.x,lightFrustra[i].foc.y }, SHADER_UNIFORM_VEC2);
         }
@@ -284,7 +286,7 @@ class Environment{
             DrawTextureRec(light_mask.texture, (Rectangle){ 0, 0, (float)GetScreenWidth(), -(float)GetScreenHeight() }, {0,0}, WHITE);
         EndBlendMode();
         for(Mirror mirror : mirrors) mirror.draw();
-        
+
     }
 
     void merge(Environment &opp_env){
@@ -313,7 +315,15 @@ class Environment{
             Wall w;
             ss >> w;
             e.walls.insert(w);
-        }*/
+        }
+        }
+        ss >> k;
+        for(int i=0;i<k;i++){
+            Wall w;
+            ss >> w;
+            e.backgroundWalls.insert(w);
+        }
+    */
         ss >> k;
         e.mirrors.resize(k);
         for(int i=0;i<k;i++) ss >> e.mirrors[i];
@@ -332,8 +342,12 @@ class Environment{
         os << e.walls.size();
         os << " ";
         for(Wall wall : e.walls) os << wall <<" ";
-        */
 
+
+        os << e.backgroundWalls.size();
+        os << " ";
+        for(Wall wall : e.backgroundWalls) os << wall <<" ";
+*/
         os << e.mirrors.size();
         os << " ";
         for(Mirror mirror : e.mirrors) os << mirror <<" ";

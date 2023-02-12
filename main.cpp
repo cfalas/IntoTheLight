@@ -110,36 +110,44 @@ void InitGame(void)
         wall.rec.x = GetRandomValue(0, screenWidth - wall.rec.width);
         wall.rec.y = GetRandomValue(0, screenHeight - wall.rec.height);
         wall.active = true;
-        wall.color = GRAY;
+        wall.color = DARKGRAY;
         e.walls.insert(wall);
     }
 	adding_mirror.active = true;
 }
 
 int EPS = 5;
-bool adding = false;
+float angle = 0;
 
 // Update game (one frame)
 void UpdateGame(void)
 {
     socket.SendPosition();
-	if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
-		if(!adding){
-			// Place mirror
-			adding = true;
-            adding_mirror.seg.p1 = Point(GetMousePosition());
-            adding_mirror.seg.p2 = Point(GetMousePosition());
-            adding_mirror.seg.p2.x += 60;
-		}
-		else{
-			// Rotate mirror
-			adding_mirror.seg.rotate(GetMouseDelta().x / 10.0);
-		}
+    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+        if(!adding_mirror.active){
+            // Make mirror visible
+            adding_mirror.active = true;
+        }
+        else{
+            e.mirrors.push_back(adding_mirror);
+            adding_mirror.active = false;
+            angle = 0;
+        }
 	}
-	else if(adding){
-		adding = false;
-		e.mirrors.push_back(adding_mirror);
-	}
+    if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && adding_mirror.active){
+        adding_mirror.active = false;
+        angle = 0;
+    }
+    if(adding_mirror.active){
+        // Move and rotate
+        adding_mirror.seg.p1 = Point(GetMousePosition());
+        adding_mirror.seg.p2 = Point(GetMousePosition());
+        adding_mirror.seg.p1.x -= 30;
+        adding_mirror.seg.p2.x += 30;
+        angle += GetMouseWheelMove() / 20.0;
+        adding_mirror.seg.rotate(angle);
+    }
+
     if (!gameOver)
     {
 
@@ -168,11 +176,18 @@ void UpdateGame(void)
         obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(0,screenHeight)),wall));
         obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(screenWidth,0)),wall));
         obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(screenWidth,0)),wall));
+        for(Wall w : e.walls){
+            obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y), Point(w.rec.x + w.rec.width, w.rec.y)), wall));
+            obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x + w.rec.width, w.rec.y), Point(w.rec.x + w.rec.width, w.rec.y + w.rec.height)), wall));
+            obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y + w.rec.height), Point(w.rec.x + w.rec.width, w.rec.y + w.rec.height)), wall));
+            obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y), Point(w.rec.x, w.rec.y + w.rec.height)), wall));
+        }
 
         
         for(Mirror mirror : e.mirrors){
             obstacles.push_back(ObstacleForSim(mirror.seg,double_mirror));
         }
+        if(adding_mirror.active) obstacles.push_back(ObstacleForSim(adding_mirror.seg,double_mirror));
 
         e.lightFrustra = run_light_simulation(obstacles, lightForSim);
 
@@ -190,7 +205,7 @@ void DrawGame(void)
         {
             e.draw();
 
-			if(adding) adding_mirror.draw();
+			if(adding_mirror.active) adding_mirror.draw();
 
             DrawText(TextFormat("%04i", score), 20, 20, 40, GRAY);
 

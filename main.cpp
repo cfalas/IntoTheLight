@@ -171,7 +171,7 @@ void UpdateGame(void)
         adding_mirror.seg.rotate(angle);
     }
 
-    if (!gameOver)
+    if (!gameOver && !victory)
     {
 
 		// Player movement

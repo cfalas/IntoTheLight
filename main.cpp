@@ -81,23 +81,13 @@ int main(void)
     socket = Websocket(&e);
     socket.ConnectServer();
 
-#if defined(PLATFORM_WEB# # # # . .
-# @ @ # . .
-. # @ @ # .
-. . # @ # .
-. . # @ # .
-. . . # @ #
-. . . # @ #
-. . . # @ *
-. . . # # *
-. . . . . .)
+#if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
 #else
     SetTargetFPS(60);
 
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        UpdateMusicStream(music);
         UpdateDrawFrame();
     }
 #endif

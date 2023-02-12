@@ -98,19 +98,20 @@ void InitGame(void)
     gameOver = false;
     victory = false;
     int numWalls = 10;
-    e.walls.assign(numWalls, Wall());
     score = 0;
     alpha = 0;
 
 
     for (int i = 0; i < numWalls; i++)
     {
-        e.walls[i].rec.width = 10;
-        e.walls[i].rec.height = 10;
-        e.walls[i].rec.x = GetRandomValue(0, screenWidth - e.walls[i].rec.width);
-        e.walls[i].rec.y = GetRandomValue(0, screenHeight - e.walls[i].rec.height);
-        e.walls[i].active = true;
-        e.walls[i].color = GRAY;
+        Wall wall;
+        wall.rec.width = 10;
+        wall.rec.height = 10;
+        wall.rec.x = GetRandomValue(0, screenWidth - wall.rec.width);
+        wall.rec.y = GetRandomValue(0, screenHeight - wall.rec.height);
+        wall.active = true;
+        wall.color = GRAY;
+        e.walls.insert(wall);
     }
 	adding_mirror.active = true;
 }
@@ -161,14 +162,12 @@ void UpdateGame(void)
 		if (e.player.rec.y + e.player.rec.height >= screenHeight) e.player.rec.y = screenHeight - e.player.rec.height;
 
 
-        static const int screenWidth = 800;
-        static const int screenHeight = 450;
         LightFrustrumForSim lightForSim(Point(200,100),Segment(Point(300,200),Point(150,200)));
         vector<ObstacleForSim> obstacles;
         obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(0,screenHeight)),double_mirror));
-        obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(0,screenHeight)),double_mirror));
-        obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(screenWidth,0)),double_mirror));
-        obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(screenWidth,0)),double_mirror));
+        obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(0,screenHeight)),wall));
+        obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(screenWidth,0)),wall));
+        obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(screenWidth,0)),wall));
 
         
         for(Mirror mirror : e.mirrors){

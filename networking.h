@@ -1,7 +1,9 @@
 #include <emscripten/emscripten.h>
 #include <emscripten/websocket.h>
+#include <sstream>
 #include <stdio.h>
 #include <string>
+#include <stdexcept>
 #include "raylib.h"
 #include "entities.h"
 #include<algorithm>
@@ -22,9 +24,18 @@ EM_BOOL onclose(int eventType, const EmscriptenWebSocketCloseEvent *websocketEve
     return EM_TRUE;
 }
 EM_BOOL onmessage(int eventType, const EmscriptenWebSocketMessageEvent *websocketEvent, void *userData) {
-    Environment opp_env;
-    memcpy(&opp_env, (websocketEvent->data), websocketEvent->numBytes);
-    ((Environment*)(userData))->merge(opp_env);
+    if(websocketEvent->numBytes < 10){
+        return EM_TRUE;
+    }
+    std::istringstream s((char*)(websocketEvent->data));
+    s.exceptions(ios::eofbit | ios::failbit | ios::badbit);
+    try{
+        Environment opp_env = Environment::deserialize(s);
+        ((Environment*)(userData))->merge(opp_env);
+    }
+    catch (exception&){
+        printf("Caught exception\n");
+    }
     return EM_TRUE;
 }
 
@@ -62,7 +73,8 @@ class Websocket{
 
     void SendPosition(){
         if(active){
-            emscripten_websocket_send_binary(ws, env, sizeof(*env));
+            string env_str = env->serialize();
+            emscripten_websocket_send_utf8_text(ws, env_str.c_str());
         }
     }
 
@@ -72,11 +84,6 @@ class Websocket{
 EM_BOOL onopen(int eventType, const EmscriptenWebSocketOpenEvent *websocketEvent, void *userData) {
     puts("onopen");
 
-    EMSCRIPTEN_RESULT result;
-    result = emscripten_websocket_send_utf8_text(websocketEvent->socket, "hoge");
-    if (result) {
-        printf("Failed to emscripten_websocket_send_utf8_text(): %d\n", result);
-    }
     ((Websocket*)(userData))->active = true;
     return EM_TRUE;
 }

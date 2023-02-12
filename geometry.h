@@ -70,6 +70,9 @@ public:
 		p2 = p2 + mid;
 
 	}
+	int sideOf(const Point& p) {
+		return sgn(p1.cross(p2, p));
+	}
 };
 
 

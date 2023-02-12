@@ -106,47 +106,56 @@ void InitGame(void)
     gameOver = false;
     victory = false;
     int numWalls = 10;
-    e.walls.assign(numWalls, Wall());
     score = 0;
     alpha = 0;
 
 
     for (int i = 0; i < numWalls; i++)
     {
-        e.walls[i].rec.width = 10;
-        e.walls[i].rec.height = 10;
-        e.walls[i].rec.x = GetRandomValue(0, screenWidth - e.walls[i].rec.width);
-        e.walls[i].rec.y = GetRandomValue(0, screenHeight - e.walls[i].rec.height);
-        e.walls[i].active = true;
-        e.walls[i].color = GRAY;
+        Wall wall;
+        wall.rec.width = 10;
+        wall.rec.height = 10;
+        wall.rec.x = GetRandomValue(0, screenWidth - wall.rec.width);
+        wall.rec.y = GetRandomValue(0, screenHeight - wall.rec.height);
+        wall.active = true;
+        wall.color = DARKGRAY;
+        e.walls.insert(wall);
     }
-	adding_mirror.active = true;
+	adding_mirror.active = false;
 }
 
 int EPS = 5;
-bool adding = false;
+float angle = 0;
 
 // Update game (one frame)
 void UpdateGame(void)
 {
     socket.SendPosition();
-	if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
-		if(!adding){
-			// Place mirror
-			adding = true;
-            adding_mirror.seg.p1 = Point(GetMousePosition());
-            adding_mirror.seg.p2 = Point(GetMousePosition());
-            adding_mirror.seg.p2.x += 60;
-		}
-		else{
-			// Rotate mirror
-			adding_mirror.seg.rotate(GetMouseDelta().x / 100.0);
-		}
+    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+        if(!adding_mirror.active){
+            // Make mirror visible
+            adding_mirror.active = true;
+        }
+        else{
+            e.mirrors.push_back(adding_mirror);
+            adding_mirror.active = false;
+            angle = 0;
+        }
 	}
-	else if(adding){
-		adding = false;
-		e.mirrors.push_back(adding_mirror);
-	}
+    if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && adding_mirror.active){
+        adding_mirror.active = false;
+        angle = 0;
+    }
+    if(adding_mirror.active){
+        // Move and rotate
+        adding_mirror.seg.p1 = Point(GetMousePosition());
+        adding_mirror.seg.p2 = Point(GetMousePosition());
+        adding_mirror.seg.p1.x -= 30;
+        adding_mirror.seg.p2.x += 30;
+        angle += GetMouseWheelMove() / 20.0;
+        adding_mirror.seg.rotate(angle);
+    }
+
     if (!gameOver)
     {
 
@@ -161,6 +170,19 @@ void UpdateGame(void)
                 e.player.fixCollision(wall);
             }
 		}
+
+        for(LightFrustrum light : e.lightFrustra){
+            if(e.player.inside(light)){
+                e.player.damage();
+            }
+        }
+
+        if(!e.player.alive()){
+            gameOver = true;
+        }
+        if(!e.opponent.alive()){
+            victory = true;
+        }
 
 		// Edges behaviour
 		if (e.player.rec.x <= 0) e.player.rec.x = 0;
@@ -206,7 +228,7 @@ void DrawGame(void)
         {
             e.draw();
 
-			if(adding) adding_mirror.draw();
+			if(adding_mirror.active) adding_mirror.draw();
 
             DrawText(TextFormat("%04i", score), 20, 20, 40, GRAY);
 

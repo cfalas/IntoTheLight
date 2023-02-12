@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include "geometry.h"
+#include "lightsim.h"
 #include<math.h>
 #include<stdio.h>
 #include<algorithm>
@@ -44,38 +45,7 @@ std::istream& operator>>(std::istream& is, Color &c){
     return is;
 }
 
-void DrawPolygon(Point a, Point b,Point c,Point d, Color color){
-    DrawTriangle(a,b,c,color);
-    DrawTriangle(c,d,a,color);
-}
 
-class LightFrustrum {
-public:
-    Point foc;
-    Segment seg1;
-    Segment seg2;
-    LightFrustrum(Point foc,Segment seg1,Segment seg2) : foc(foc),seg1(seg1),seg2(seg2){};
-    LightFrustrum() : seg1(Point(0, 0), Point(0, 0)),seg2(Point(0, 0), Point(0, 0)){};
-    
-    void draw(unsigned char i, unsigned char color){
-        //cout<<foc<<" "<<seg1.p1<<" "<<seg1.p2<<" "<<seg2.p1<<" "<<seg2.p2<<endl;
-        //DrawCircle(foc.x,foc.y,5,BLUE);
-        DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,color,0,255});
-        //DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,i,i,i});
-    }
-    friend std::ostream& operator<<(std::ostream& os, const LightFrustrum m){
-        os << m.seg1.p1.x<<" "<<m.seg1.p1.y << " " << m.seg1.p2.x<<" "<<m.seg1.p2.y << " ";
-        os << m.seg2.p1.x<<" "<<m.seg2.p1.y << " " << m.seg2.p2.x<<" "<<m.seg2.p2.y << " ";
-        os << m.foc.x << " "<< m.foc.y;
-        return os;
-    }
-    friend std::istream& operator>>(std::istream& is, LightFrustrum &m){
-        is >> m.seg1.p1.x >> m.seg1.p1.y >> m.seg1.p2.x >> m.seg1.p2.y;
-        is >> m.seg2.p1.x >> m.seg2.p1.y >> m.seg2.p2.x >> m.seg2.p2.y;
-        is >> m.foc.x >> m.foc.y;
-        return is;
-    }
-};
 
 class SolidObject{
     public:
@@ -240,9 +210,13 @@ class Environment{
     vector<Mirror> oppMirrors;
     vector<LightFrustrum> myLightFrustra;
     vector<LightFrustrum> oppLightFrustra;
+    LightFrustrumForSim myStartingLight;
+    LightFrustrumForSim oppStartingLight;
     set<Wall> backgroundWalls;
     
-    Environment(){
+    Environment()
+        : myStartingLight(Point(200,100),Segment(Point(300,200),Point(150,200))),
+          oppStartingLight(Point(800,500),Segment(Point(750,450),Point(850,450))) {
         player.rec.x =  200;
         player.rec.y = 200;
         player.rec.width = 20;
@@ -278,12 +252,11 @@ class Environment{
         player.draw();
         opponent.draw();
         for(Wall wall : walls) wall.draw();
-        for(Mirror mirror : mirrors) mirror.draw();
         
         BeginTextureMode(light_mask);
         ClearBackground({0,0,0,255});
-        drawLightFrustra(myLightFrustra);
-        drawLightFrustra(oppLightFrustra);
+        drawLightFrustra(myLightFrustra,0);
+        drawLightFrustra(oppLightFrustra,1);
         opponent.draw();
         DrawCircleGradient(player.midpoint().x,player.midpoint().y, 100, {255,255,255,50}, {255,255,255,0});
         EndTextureMode();
@@ -291,20 +264,16 @@ class Environment{
         if(opponent.alive() && player.alive())
             DrawTextureRec(light_mask.texture, (Rectangle){ 0, 0, (float)GetScreenWidth(), -(float)GetScreenHeight() }, {0,0}, WHITE);
         EndBlendMode();
-        for(Mirror mirror : mirrors) mirror.draw();
+        for(Mirror mirror : myMirrors) mirror.draw();
+        for(Mirror mirror : oppMirrors) mirror.draw();
 
     }
 
     void merge(Environment &opp_env){
         //walls = opp_env.walls;
-        if(opp_env.mirrors.size() > mirrors.size()){
-            mirrors.clear();
-            for(Mirror m : opp_env.mirrors) mirrors.push_back(m);
-        }
-        if(opp_env.lightFrustra.size() > lightFrustra.size()){
-            lightFrustra.clear();
-            for(LightFrustrum m : opp_env.lightFrustra) lightFrustra.push_back(m);
-        }
+        oppMirrors = opp_env.myMirrors;
+        oppLightFrustra = opp_env.myLightFrustra;
+        oppStartingLight = opp_env.myStartingLight;
 
         opponent.rec = opp_env.player.rec;
         opponent.health = opp_env.player.health;
@@ -331,12 +300,12 @@ class Environment{
         }
     */
         ss >> k;
-        e.mirrors.resize(k);
-        for(int i=0;i<k;i++) ss >> e.mirrors[i];
+        e.myMirrors.resize(k);
+        for(int i=0;i<k;i++) ss >> e.myMirrors[i];
 
         ss >> k;
-        e.lightFrustra.resize(k);
-        for(int i=0;i<k;i++) ss >> e.lightFrustra[i];
+        e.myLightFrustra.resize(k);
+        for(int i=0;i<k;i++) ss >> e.myLightFrustra[i];
         return ss;
     }
     friend std::ostream& operator<<(std::ostream& os, const Environment e){
@@ -354,13 +323,13 @@ class Environment{
         os << " ";
         for(Wall wall : e.backgroundWalls) os << wall <<" ";
 */
-        os << e.mirrors.size();
+        os << e.myMirrors.size();
         os << " ";
-        for(Mirror mirror : e.mirrors) os << mirror <<" ";
+        for(Mirror mirror : e.myMirrors) os << mirror <<" ";
 
-        os << e.lightFrustra.size();
+        os << e.myLightFrustra.size();
         os << " ";
-        for(LightFrustrum lightFrustrum : e.lightFrustra) os << lightFrustrum <<" ";
+        for(LightFrustrum lightFrustrum : e.myLightFrustra) os << lightFrustrum <<" ";
         return os;
     }
 	string serialize() {

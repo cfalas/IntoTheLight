@@ -1,6 +1,5 @@
 #include "geometry.h"
 #include "raylib.h"
-#include "entities.h"
 #include<vector>
 #include<queue>
 #include<algorithm>
@@ -9,6 +8,39 @@
 using namespace std;
 #pragma once
 float eps=1e-3;
+
+void DrawPolygon(Point a, Point b,Point c,Point d, Color color){
+    DrawTriangle(a,b,c,color);
+    DrawTriangle(c,d,a,color);
+}
+
+class LightFrustrum {
+public:
+    Point foc;
+    Segment seg1;
+    Segment seg2;
+    LightFrustrum(Point foc,Segment seg1,Segment seg2) : foc(foc),seg1(seg1),seg2(seg2){};
+    LightFrustrum() : seg1(Point(0, 0), Point(0, 0)),seg2(Point(0, 0), Point(0, 0)){};
+    
+    void draw(unsigned char i, unsigned char color){
+        //cout<<foc<<" "<<seg1.p1<<" "<<seg1.p2<<" "<<seg2.p1<<" "<<seg2.p2<<endl;
+        //DrawCircle(foc.x,foc.y,5,BLUE);
+        DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,color,0,255});
+        //DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,i,i,i});
+    }
+    friend std::ostream& operator<<(std::ostream& os, const LightFrustrum m){
+        os << m.seg1.p1.x<<" "<<m.seg1.p1.y << " " << m.seg1.p2.x<<" "<<m.seg1.p2.y << " ";
+        os << m.seg2.p1.x<<" "<<m.seg2.p1.y << " " << m.seg2.p2.x<<" "<<m.seg2.p2.y << " ";
+        os << m.foc.x << " "<< m.foc.y;
+        return os;
+    }
+    friend std::istream& operator>>(std::istream& is, LightFrustrum &m){
+        is >> m.seg1.p1.x >> m.seg1.p1.y >> m.seg1.p2.x >> m.seg1.p2.y;
+        is >> m.seg2.p1.x >> m.seg2.p1.y >> m.seg2.p2.x >> m.seg2.p2.y;
+        is >> m.foc.x >> m.foc.y;
+        return is;
+    }
+};
 
 enum ObstacleType {wall, single_mirror, double_mirror};
 

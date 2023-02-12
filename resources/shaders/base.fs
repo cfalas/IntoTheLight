@@ -23,7 +23,7 @@ void main()
 {
     float alph = 1.0/(distance(getData(int(fragColor.x*255.0)),fragPosition.xy)*0.005);
     alph = alph*0.3;
-    if(fragColor.x*255.0>0.5){
+    if(fragColor.y*255.0>0.5){
         gl_FragColor = vec4(1,0,0,alph);
     } else {
         gl_FragColor = vec4(0,0,1,alph);

@@ -146,7 +146,7 @@ void UpdateGame(void)
             adding_mirror.active = true;
         }
         else{
-            e.mirrors.push_back(adding_mirror);
+            e.myMirrors.push_back(adding_mirror);
             adding_mirror.active = false;
             angle = 0;
         }
@@ -184,7 +184,7 @@ void UpdateGame(void)
             }
 		}
 
-        for(LightFrustrum light : e.lightFrustra){
+        for(LightFrustrum light : e.oppLightFrustra){
             if(e.player.inside(light)){
                 e.player.damage();
             }
@@ -219,7 +219,7 @@ void UpdateGame(void)
             obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(screenWidth,0)),wall));
             obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(screenWidth,0)),wall));
 
-            for(Mirror mirror : e.mirrors){
+            for(Mirror mirror : e.myMirrors){
                 obstacles.push_back(ObstacleForSim(mirror.seg,double_mirror));
             }
 
@@ -235,16 +235,13 @@ void UpdateGame(void)
             obstacles.push_back(ObstacleForSim(Segment(Point(e.opponent.rec.x, e.opponent.rec.y + e.opponent.rec.height), Point(e.opponent.rec.x + e.opponent.rec.width, e.opponent.rec.y + e.opponent.rec.height)), wall));
             obstacles.push_back(ObstacleForSim(Segment(Point(e.opponent.rec.x, e.opponent.rec.y), Point(e.opponent.rec.x, e.opponent.rec.y + e.opponent.rec.height)), wall));
 
-           vector<LightFrustrumForSim> startingLights = {
-                   LightFrustrumForSim(Point(200,100),Segment(Point(300,200),Point(150,200))),
-                   LightFrustrumForSim(Point(800,500),Segment(Point(750,450),Point(850,450)))
-            };
+           vector<LightFrustrumForSim> startingLights = {e.myStartingLight};
             // obstacles.push_back(ObstacleForSim(adding_mirror.seg,double_mirror));
-            e.lightFrustra.clear();
+            e.myLightFrustra.clear();
             for (LightFrustrumForSim light : startingLights) {
                 auto newLights =run_light_simulation(obstacles, light);
-                e.lightFrustra.reserve(e.lightFrustra.size() + newLights.size());
-                e.lightFrustra.insert(e.lightFrustra.end(),newLights.begin(),newLights.end());
+                e.myLightFrustra.reserve(e.myLightFrustra.size() + newLights.size());
+                e.myLightFrustra.insert(e.myLightFrustra.end(),newLights.begin(),newLights.end());
             }
 
             //e.lightFrustra.push_back(LightFrustrum(Point(200,100),Segment(Point(300,200),Point(150,200)),Segment(Point(300,200),Point(150,200))));

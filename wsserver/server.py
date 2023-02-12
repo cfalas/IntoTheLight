@@ -1,6 +1,7 @@
 import asyncio
 import websockets
 from logging import getLogger, INFO, StreamHandler
+import random
 
 logger = getLogger('websockets')
 logger.setLevel(INFO)
@@ -16,7 +17,6 @@ async def handler(websocket, path):
             for client in clients:
                 if client != websocket:
                     await client.send(message)
-            print(message)
     finally:
         clients.remove(websocket)
 

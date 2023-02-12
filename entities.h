@@ -121,7 +121,6 @@ class Player : public SolidObject{
 
     void damage(){
         health--;
-        printf("Health %d\n", health);
     }
 
     void setSpeed(){
@@ -210,12 +209,14 @@ class Environment{
     vector<Mirror> oppMirrors;
     vector<LightFrustrum> myLightFrustra;
     vector<LightFrustrum> oppLightFrustra;
+    int oppId;
+    int myId;
     LightFrustrumForSim myStartingLight;
     LightFrustrumForSim oppStartingLight;
     set<Wall> backgroundWalls;
     
     Environment()
-        : myStartingLight(Point(200,100),Segment(Point(300,200),Point(150,200))),
+        : myStartingLight(Point(200,-100),Segment(Point(300,200),Point(150,200))),
           oppStartingLight(Point(800,500),Segment(Point(750,450),Point(850,450))) {
         player.rec.x =  200;
         player.rec.y = 200;
@@ -223,6 +224,9 @@ class Environment{
         player.rec.height = 20;
         player.maxspeed = 5;
         player.color = GRAY;
+
+        srand(time(0));
+        myId = rand();
 
         opponent.rec.x =  20;
         opponent.rec.y = 50;
@@ -272,10 +276,13 @@ class Environment{
 
     void merge(Environment &opp_env){
         //walls = opp_env.walls;
-        if(myStartingLight.foc.x == opp_env.myStartingLight.foc.x){
+        oppId = opp_env.myId;
+        if(myStartingLight.foc.x == opp_env.myStartingLight.foc.x && oppId < myId){
             myMirrors = oppMirrors;
             myLightFrustra = oppLightFrustra;
             myStartingLight = oppStartingLight;
+            player.rec.x = 800;
+            player.rec.y = 400;
         }
         oppMirrors = opp_env.myMirrors;
         oppLightFrustra = opp_env.myLightFrustra;
@@ -287,24 +294,11 @@ class Environment{
     }
 
     friend std::istream& operator>>(std::istream& ss, Environment &e){
+        ss >> e.myId;
         ss >> e.player;
         ss >> e.opponent;
         int k;
-        /*
-        ss >> k;
-        for(int i=0;i<k;i++){
-            Wall w;
-            ss >> w;
-            e.walls.insert(w);
-        }
-        }
-        ss >> k;
-        for(int i=0;i<k;i++){
-            Wall w;
-            ss >> w;
-            e.backgroundWalls.insert(w);
-        }
-    */
+
         ss >> k;
         e.myMirrors.resize(k);
         for(int i=0;i<k;i++) ss >> e.myMirrors[i];
@@ -323,6 +317,7 @@ class Environment{
         return ss;
     }
     friend std::ostream& operator<<(std::ostream& os, const Environment e){
+        os << e.myId << " ";
         os << e.player;
         os << " ";
         os << e.opponent;

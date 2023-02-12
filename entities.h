@@ -211,7 +211,7 @@ class Mirror {
     bool active;
     Segment seg = Segment(Point(), Point());
     void draw(){
-	    if(active) DrawLine(seg.p1.x, seg.p1.y, seg.p2.x, seg.p2.y, RED);
+	    DrawLine(seg.p1.x, seg.p1.y, seg.p2.x, seg.p2.y, RED);
     }
     friend std::ostream& operator<<(std::ostream& os, const Mirror m){
         os << m.seg.p1.x<<" "<<m.seg.p1.y << " " << m.seg.p2.x<<" "<<m.seg.p2.y;
@@ -237,9 +237,10 @@ class Environment{
     Player opponent;
     set<Wall> walls;
     vector<Mirror> myMirrors;
-    vector<LightFrustrum> myLightFrustra;
     vector<Mirror> oppMirrors;
+    vector<LightFrustrum> myLightFrustra;
     vector<LightFrustrum> oppLightFrustra;
+    set<Wall> backgroundWalls;
     
     Environment(){
         player.rec.x =  200;
@@ -287,13 +288,15 @@ class Environment{
         DrawCircleGradient(player.midpoint().x,player.midpoint().y, 100, {255,255,255,50}, {255,255,255,0});
         EndTextureMode();
         BeginBlendMode(BLEND_MULTIPLIED);
-        DrawTextureRec(light_mask.texture, (Rectangle){ 0, 0, (float)GetScreenWidth(), -(float)GetScreenHeight() }, {0,0}, WHITE);
+        if(opponent.alive() && player.alive())
+            DrawTextureRec(light_mask.texture, (Rectangle){ 0, 0, (float)GetScreenWidth(), -(float)GetScreenHeight() }, {0,0}, WHITE);
         EndBlendMode();
-        
+        for(Mirror mirror : mirrors) mirror.draw();
+
     }
 
     void merge(Environment &opp_env){
-        walls = opp_env.walls;
+        //walls = opp_env.walls;
         if(opp_env.mirrors.size() > mirrors.size()){
             mirrors.clear();
             for(Mirror m : opp_env.mirrors) mirrors.push_back(m);
@@ -312,12 +315,21 @@ class Environment{
         ss >> e.player;
         ss >> e.opponent;
         int k;
+        /*
         ss >> k;
         for(int i=0;i<k;i++){
             Wall w;
             ss >> w;
             e.walls.insert(w);
         }
+        }
+        ss >> k;
+        for(int i=0;i<k;i++){
+            Wall w;
+            ss >> w;
+            e.backgroundWalls.insert(w);
+        }
+    */
         ss >> k;
         e.mirrors.resize(k);
         for(int i=0;i<k;i++) ss >> e.mirrors[i];
@@ -332,10 +344,16 @@ class Environment{
         os << " ";
         os << e.opponent;
         os << " ";
+        /*
         os << e.walls.size();
         os << " ";
         for(Wall wall : e.walls) os << wall <<" ";
 
+
+        os << e.backgroundWalls.size();
+        os << " ";
+        for(Wall wall : e.backgroundWalls) os << wall <<" ";
+*/
         os << e.mirrors.size();
         os << " ";
         for(Mirror mirror : e.mirrors) os << mirror <<" ";

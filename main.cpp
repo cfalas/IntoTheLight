@@ -26,10 +26,14 @@ using namespace std;
 //------------------------------------------------------------------------------------
 // Global Variables Declaration
 //------------------------------------------------------------------------------------
-static const int screenWidth = 1000;
-static const int screenHeight = 600;
 
 static const int wallPixel = 25;
+static const int mapWidth = 40;
+static const int mapHeight = 24;
+
+static const int screenWidth = wallPixel*mapWidth;
+static const int screenHeight = wallPixel*mapHeight;
+
 
 static bool gameOver = false;
 static bool pause =  false;
@@ -75,24 +79,14 @@ int main(void)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
 #else
     SetTargetFPS(60);
-    //--------------------------------------------------------------------------------------
 
-    // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        // Update and Draw
-        //----------------------------------------------------------------------------------
         UpdateDrawFrame();
-        //----------------------------------------------------------------------------------
     }
 #endif
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadGame();         // Unload loaded data (textures, sounds, models...)
-
-    CloseWindow();        // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
-
+    UnloadGame();
+    CloseWindow();
     return 0;
 }
 
@@ -108,16 +102,15 @@ void InitGame(void)
     pause = false;
     gameOver = false;
     victory = false;
-    int numWalls = 10;
     score = 0;
     alpha = 0;
 
     ifstream fin("resources/charmap.txt");
-    for (int i = 0; i < 25; i++) {
-        for (int j = 0; j < 40; j++) {
+    for (int i = 0; i < mapHeight; i++) {
+        for (int j = 0; j < mapWidth; j++) {
             char c;
             fin >> c;
-            if (c == '#' || c == '*') {
+            if (c != '.') {
                 Wall wall;
                 wall.rec.width = wallPixel;
                 wall.rec.height = wallPixel;
@@ -126,7 +119,12 @@ void InitGame(void)
                 wall.active = true;
                 wall.color = DARKGRAY;
                 wall.mirror = c == '*';
-                e.walls.insert(wall);
+                if (c == '#' || c == '*') {
+                    e.walls.insert(wall);
+                }
+                else if (c == '@'){
+                    e.backgroundWalls.insert(wall);
+                }
             }
         }
     }
@@ -171,7 +169,7 @@ void UpdateGame(void)
         adding_mirror.seg.rotate(angle);
     }
 
-    if (!gameOver)
+    if (!gameOver && !victory)
     {
 
 		// Player movement
@@ -214,7 +212,7 @@ void UpdateGame(void)
             // e.mirrors.push_back(mirror);
             // mirror.seg = Segment(Point(450,450), Point(450,500));
             // e.mirrors.push_back(mirror);
-            LightFrustrumForSim lightForSim(Point(400,-200),Segment(Point(500,100),Point(350,100)));
+
             vector<ObstacleForSim> obstacles;
             obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(0,screenHeight)),wall));
             obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(0,screenHeight)),wall));
@@ -237,10 +235,17 @@ void UpdateGame(void)
             obstacles.push_back(ObstacleForSim(Segment(Point(e.opponent.rec.x, e.opponent.rec.y + e.opponent.rec.height), Point(e.opponent.rec.x + e.opponent.rec.width, e.opponent.rec.y + e.opponent.rec.height)), wall));
             obstacles.push_back(ObstacleForSim(Segment(Point(e.opponent.rec.x, e.opponent.rec.y), Point(e.opponent.rec.x, e.opponent.rec.y + e.opponent.rec.height)), wall));
 
-
+           vector<LightFrustrumForSim> startingLights = {
+                   LightFrustrumForSim(Point(200,100),Segment(Point(300,200),Point(150,200))),
+                   LightFrustrumForSim(Point(800,500),Segment(Point(750,450),Point(850,450)))
+            };
             // obstacles.push_back(ObstacleForSim(adding_mirror.seg,double_mirror));
-
-            e.lightFrustra = run_light_simulation(obstacles, lightForSim);
+            e.lightFrustra.clear();
+            for (LightFrustrumForSim light : startingLights) {
+                auto newLights =run_light_simulation(obstacles, light);
+                e.lightFrustra.reserve(e.lightFrustra.size() + newLights.size());
+                e.lightFrustra.insert(e.lightFrustra.end(),newLights.begin(),newLights.end());
+            }
 
             //e.lightFrustra.push_back(LightFrustrum(Point(200,100),Segment(Point(300,200),Point(150,200)),Segment(Point(300,200),Point(150,200))));
         //}

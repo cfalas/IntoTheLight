@@ -83,8 +83,8 @@ class SolidObject{
         Color color;
         bool active = true;
 
-	Vector2 midpoint(){
-		return Vector2({rec.x + rec.width / 2, rec.y + rec.height / 2});
+	Point midpoint(){
+		return Point({rec.x + rec.width / 2, rec.y + rec.height / 2});
 	}
 
 
@@ -258,6 +258,7 @@ class Environment{
 
     void draw(){
         player.draw();
+        opponent.draw();
         for(Wall wall : walls) wall.draw();
         for(Mirror mirror : mirrors) mirror.draw();
         
@@ -275,7 +276,6 @@ class Environment{
         }
         EndBlendMode();
         EndShaderMode();
-        opponent.draw();
         EndTextureMode();
         BeginBlendMode(BLEND_MULTIPLIED);
         DrawTextureRec(light_mask.texture, (Rectangle){ 0, 0, (float)GetScreenWidth(), -(float)GetScreenHeight() }, {0,0}, WHITE);

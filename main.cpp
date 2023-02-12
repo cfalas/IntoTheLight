@@ -159,8 +159,12 @@ void UpdateGame(void)
     }
     if(adding_mirror.active){
         // Move and rotate
-        adding_mirror.seg.p1 = Point(GetMousePosition());
-        adding_mirror.seg.p2 = Point(GetMousePosition());
+        Point p = Point(GetMousePosition());
+        if ((p-e.player.midpoint()).dist() > 150){
+            p = e.player.midpoint() + (p-e.player.midpoint()).unit() * 150;
+        }
+        adding_mirror.seg.p1 = p;
+        adding_mirror.seg.p2 = p;
         adding_mirror.seg.p1.x -= 30;
         adding_mirror.seg.p2.x += 30;
         angle += GetMouseWheelMove() / 20.0;

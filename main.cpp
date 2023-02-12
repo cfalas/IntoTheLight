@@ -15,6 +15,7 @@
 #include "lightsim.h"
 #include "entities.h"
 #include<vector>
+#include<fstream>
 using namespace std;
 
 #if defined(PLATFORM_WEB)
@@ -27,6 +28,8 @@ using namespace std;
 //------------------------------------------------------------------------------------
 static const int screenWidth = 1000;
 static const int screenHeight = 600;
+
+static const int wallPixel = 25;
 
 static bool gameOver = false;
 static bool pause =  false;
@@ -109,18 +112,26 @@ void InitGame(void)
     score = 0;
     alpha = 0;
 
-
-    for (int i = 0; i < numWalls; i++)
-    {
-        Wall wall;
-        wall.rec.width = 10;
-        wall.rec.height = 10;
-        wall.rec.x = GetRandomValue(0, screenWidth - wall.rec.width);
-        wall.rec.y = GetRandomValue(0, screenHeight - wall.rec.height);
-        wall.active = true;
-        wall.color = DARKGRAY;
-        e.walls.insert(wall);
+    ifstream fin("resources/charmap.txt");
+    for (int i = 0; i < 25; i++) {
+        for (int j = 0; j < 40; j++) {
+            char c;
+            fin >> c;
+            if (c == '#' || c == '*') {
+                Wall wall;
+                wall.rec.width = wallPixel;
+                wall.rec.height = wallPixel;
+                wall.rec.x = wallPixel*j;
+                wall.rec.y = wallPixel*i;
+                wall.active = true;
+                wall.color = DARKGRAY;
+                wall.mirror = c == '*';
+                e.walls.insert(wall);
+            }
+        }
     }
+    fin.close();
+
 	adding_mirror.active = false;
 }
 
@@ -205,16 +216,17 @@ void UpdateGame(void)
             obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(0,screenHeight)),wall));
             obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(screenWidth,0)),wall));
             obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(screenWidth,0)),wall));
-      
+
             for(Mirror mirror : e.mirrors){
                 obstacles.push_back(ObstacleForSim(mirror.seg,double_mirror));
             }
 
             for(Wall w : e.walls){
-                obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y), Point(w.rec.x + w.rec.width, w.rec.y)), wall));
-                obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x + w.rec.width, w.rec.y), Point(w.rec.x + w.rec.width, w.rec.y + w.rec.height)), wall));
-                obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y + w.rec.height), Point(w.rec.x + w.rec.width, w.rec.y + w.rec.height)), wall));
-                obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y), Point(w.rec.x, w.rec.y + w.rec.height)), wall));
+                ObstacleType type = w.mirror ? double_mirror : wall;
+                obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y), Point(w.rec.x + w.rec.width, w.rec.y)), type));
+                obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x + w.rec.width, w.rec.y), Point(w.rec.x + w.rec.width, w.rec.y + w.rec.height)), type));
+                obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y + w.rec.height), Point(w.rec.x + w.rec.width, w.rec.y + w.rec.height)), type));
+                obstacles.push_back(ObstacleForSim(Segment(Point(w.rec.x, w.rec.y), Point(w.rec.x, w.rec.y + w.rec.height)), type));
             }
             obstacles.push_back(ObstacleForSim(Segment(Point(e.opponent.rec.x, e.opponent.rec.y), Point(e.opponent.rec.x + e.opponent.rec.width, e.opponent.rec.y)), wall));
             obstacles.push_back(ObstacleForSim(Segment(Point(e.opponent.rec.x + e.opponent.rec.width, e.opponent.rec.y), Point(e.opponent.rec.x + e.opponent.rec.width, e.opponent.rec.y + e.opponent.rec.height)), wall));

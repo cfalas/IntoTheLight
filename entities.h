@@ -200,6 +200,7 @@ class Player : public SolidObject{
 
 class Wall : public SolidObject{
     public:
+    bool mirror;
     bool operator<(const Wall& rhs) const {
         return std::tie(rec.x, rec.y, rec.width, rec.height) < std::tie(rhs.rec.x, rhs.rec.y, rhs.rec.width, rhs.rec.height);
     }
@@ -264,7 +265,7 @@ class Environment{
             SetShaderValue(lightShader, lightShaderFocusLocs[i], (float[2]){ lightFrustra[i].foc.x,lightFrustra[i].foc.y }, SHADER_UNIFORM_VEC2);
         }
         BeginTextureMode(light_mask);
-        ClearBackground({50,50,50,255});
+        ClearBackground({0,0,0,255});
         BeginShaderMode(lightShader);
         BeginBlendMode(BLEND_ADDITIVE);
         // rlSetBlendFactors(RLGL_SRC_ALPHA, RLGL_SRC_ALPHA, RLGL_MIN);

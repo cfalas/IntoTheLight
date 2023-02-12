@@ -219,7 +219,7 @@ class Environment{
     public:
     Shader lightShader;
     vector<int> lightShaderFocusLocs;
-    RenderTexture2D render_mask;
+    RenderTexture2D light_mask;
     Player player;
     Player opponent;
     set<Wall> walls;
@@ -252,7 +252,7 @@ class Environment{
         for(int i = 0; i < lightFrustra.size(); i++){
             SetShaderValue(lightShader, lightShaderFocusLocs[i], (float[2]){ lightFrustra[i].foc.x,lightFrustra[i].foc.y }, SHADER_UNIFORM_VEC2);
         }
-        BeginTextureMode(render_mask);
+        BeginTextureMode(light_mask);
         ClearBackground({50,50,50,255});
         BeginShaderMode(lightShader);
         BeginBlendMode(BLEND_ADDITIVE);
@@ -265,7 +265,7 @@ class Environment{
         EndShaderMode();
         EndTextureMode();
         BeginBlendMode(BLEND_MULTIPLIED);
-        DrawTextureRec(render_mask.texture, (Rectangle){ 0, 0, (float)GetScreenWidth(), -(float)GetScreenHeight() }, {0,0}, WHITE);
+        DrawTextureRec(light_mask.texture, (Rectangle){ 0, 0, (float)GetScreenWidth(), -(float)GetScreenHeight() }, {0,0}, WHITE);
         EndBlendMode();
         
     }

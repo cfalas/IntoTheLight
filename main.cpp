@@ -62,7 +62,7 @@ int main(void)
     for(int i = 0;i<100;i++){
         e.lightShaderFocusLocs.push_back(GetShaderLocation(e.lightShader, TextFormat("focuspoints[%i]\0",i)));
     }
-    e.render_mask = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+    e.light_mask = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
 
     InitGame();
     socket = Websocket(&e);

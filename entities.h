@@ -252,6 +252,7 @@ class Environment{
         player.draw();
         opponent.draw();
         for(Wall wall : walls) wall.draw();
+        for(Wall wall : backgroundWalls) wall.draw();
         
         BeginTextureMode(light_mask);
         ClearBackground({0,0,0,255});

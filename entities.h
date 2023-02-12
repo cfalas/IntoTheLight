@@ -271,6 +271,11 @@ class Environment{
 
     void merge(Environment &opp_env){
         //walls = opp_env.walls;
+        if(myStartingLight.foc.x == opp_env.myStartingLight.foc.x){
+            myMirrors = oppMirrors;
+            myLightFrustra = oppLightFrustra;
+            myStartingLight = oppStartingLight;
+        }
         oppMirrors = opp_env.myMirrors;
         oppLightFrustra = opp_env.myLightFrustra;
         oppStartingLight = opp_env.myStartingLight;
@@ -306,6 +311,14 @@ class Environment{
         ss >> k;
         e.myLightFrustra.resize(k);
         for(int i=0;i<k;i++) ss >> e.myLightFrustra[i];
+
+        ss >> k;
+        e.oppMirrors.resize(k);
+        for(int i=0;i<k;i++) ss >> e.oppMirrors[i];
+
+        ss >> k;
+        e.oppLightFrustra.resize(k);
+        for(int i=0;i<k;i++) ss >> e.oppLightFrustra[i];
         return ss;
     }
     friend std::ostream& operator<<(std::ostream& os, const Environment e){
@@ -330,6 +343,15 @@ class Environment{
         os << e.myLightFrustra.size();
         os << " ";
         for(LightFrustrum lightFrustrum : e.myLightFrustra) os << lightFrustrum <<" ";
+
+        os << e.oppMirrors.size();
+        os << " ";
+        for(Mirror mirror : e.oppMirrors) os << mirror <<" ";
+
+        os << e.oppLightFrustra.size();
+        os << " ";
+        for(LightFrustrum lightFrustrum : e.oppLightFrustra) os << lightFrustrum <<" ";
+
         return os;
     }
 	string serialize() {

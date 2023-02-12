@@ -56,10 +56,10 @@ public:
 };
 
 class LightFrustrumForSim {
-    Point foc;
-    Segment seg;
 
 public:
+    Point foc;
+    Segment seg;
     LightFrustrumForSim(Point foc_,Segment seg_) : foc(foc_),seg(seg_){
         seg.p1 = (seg.p1-foc)*(1.0001)+foc;
         seg.p2 = (seg.p2-foc)*(1.0001)+foc;

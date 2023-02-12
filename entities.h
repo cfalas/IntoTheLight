@@ -127,10 +127,11 @@ public:
     Segment seg2;
     LightFrustrum(Point foc,Segment seg1,Segment seg2) : foc(foc),seg1(seg1),seg2(seg2){};
     
-    void draw(){
+    void draw(unsigned char i){
         //cout<<foc<<" "<<seg1.p1<<" "<<seg1.p2<<" "<<seg2.p1<<" "<<seg2.p2<<endl;
         DrawCircle(foc.x,foc.y,5,BLUE);
-        DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{255,255,255,128});
+        DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,i,i,i});
+        DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,i,i,i});
     }
 };
 
@@ -146,6 +147,9 @@ class Environment{
         return s.str();
 	}*/
     public:
+    Shader lightShader;
+    vector<int> lightShaderFocusLocs;
+    RenderTexture2D render_mask;
     Player player;
     Player opponent;
     vector<Wall> walls;
@@ -174,7 +178,26 @@ class Environment{
         opponent.draw();
         for(Wall wall : walls) wall.draw();
         for(Mirror mirror : mirrors) mirror.draw();
-        for(LightFrustrum light : lightFrustra) light.draw();
+        
+        for(int i = 0; i < lightFrustra.size(); i++){
+            SetShaderValue(lightShader, lightShaderFocusLocs[i], (float[2]){ lightFrustra[i].foc.x,lightFrustra[i].foc.y }, SHADER_UNIFORM_VEC2);
+        }
+        BeginTextureMode(render_mask);
+        ClearBackground({50,50,50,255});
+        BeginShaderMode(lightShader);
+        BeginBlendMode(BLEND_ADDITIVE);
+        // rlSetBlendFactors(RLGL_SRC_ALPHA, RLGL_SRC_ALPHA, RLGL_MIN);
+        // rlSetBlendMode(BLEND_CUSTOM);
+        for(int i = 0; i < lightFrustra.size(); i++){
+            lightFrustra[i].draw(i);
+        }
+        EndBlendMode();
+        EndShaderMode();
+        EndTextureMode();
+        BeginBlendMode(BLEND_MULTIPLIED);
+        DrawTextureRec(render_mask.texture, (Rectangle){ 0, 0, (float)GetScreenWidth(), -(float)GetScreenHeight() }, {0,0}, WHITE);
+        EndBlendMode();
+        
     }
 
     void merge(Environment opp_env){

@@ -25,8 +25,8 @@ using namespace std;
 //------------------------------------------------------------------------------------
 // Global Variables Declaration
 //------------------------------------------------------------------------------------
-static const int screenWidth = 800;
-static const int screenHeight = 450;
+static const int screenWidth = 1000;
+static const int screenHeight = 600;
 
 static bool gameOver = false;
 static bool pause =  false;
@@ -47,6 +47,7 @@ static void DrawGame(void);         // Draw game (one frame)
 static void UnloadGame(void);       // Unload game
 static void UpdateDrawFrame(void);  // Update and Draw (one frame)
 
+Shader shader;
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -54,7 +55,14 @@ int main(void)
 {
     // Initialization (Note windowTitle is unused on Android)
     //---------------------------------------------------------
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(screenWidth, screenHeight, "classic game: space invaders");
+
+    e.lightShader = LoadShader("resources/shaders/base.vs","resources/shaders/base.fs");
+    for(int i = 0;i<100;i++){
+        e.lightShaderFocusLocs.push_back(GetShaderLocation(e.lightShader, TextFormat("focuspoints[%i]\0",i)));
+    }
+    e.render_mask = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
 
     InitGame();
     socket = Websocket(&e);
@@ -132,7 +140,7 @@ void UpdateGame(void)
 		}
 		else{
 			// Rotate mirror
-			adding_mirror.seg.rotate(GetMouseDelta().x / 10.0);
+			adding_mirror.seg.rotate(GetMouseDelta().x / 100.0);
 		}
 	}
 	else if(adding){
@@ -160,23 +168,31 @@ void UpdateGame(void)
 		if (e.player.rec.y <= 0) e.player.rec.y = 0;
 		if (e.player.rec.y + e.player.rec.height >= screenHeight) e.player.rec.y = screenHeight - e.player.rec.height;
 
-
-        static const int screenWidth = 800;
-        static const int screenHeight = 450;
-        LightFrustrumForSim lightForSim(Point(200,100),Segment(Point(300,200),Point(150,200)));
-        vector<ObstacleForSim> obstacles;
-        obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(0,screenHeight)),double_mirror));
-        obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(0,screenHeight)),double_mirror));
-        obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(screenWidth,0)),double_mirror));
-        obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(screenWidth,0)),double_mirror));
-
         
-        for(Mirror mirror : e.mirrors){
-            obstacles.push_back(ObstacleForSim(mirror.seg,double_mirror));
-        }
+        
+        //if(e.lightFrustra.size()==0){
+            // Mirror mirror;
+            // mirror.active = true;
+            // mirror.seg = Segment(Point(200,400), Point(250,400));
+            // e.mirrors.push_back(mirror);
+            // mirror.seg = Segment(Point(450,450), Point(450,500));
+            // e.mirrors.push_back(mirror);
+            LightFrustrumForSim lightForSim(Point(200,100),Segment(Point(300,200),Point(150,200)));
+            vector<ObstacleForSim> obstacles;
+            obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(0,screenHeight)),wall));
+            obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(0,screenHeight)),wall));
+            obstacles.push_back(ObstacleForSim(Segment(Point(screenWidth,screenHeight),Point(screenWidth,0)),wall));
+            obstacles.push_back(ObstacleForSim(Segment(Point(0,0),Point(screenWidth,0)),wall));
+      
+            for(Mirror mirror : e.mirrors){
+                obstacles.push_back(ObstacleForSim(mirror.seg,double_mirror));
+            }
+            obstacles.push_back(ObstacleForSim(adding_mirror.seg,double_mirror));
 
-        e.lightFrustra = run_light_simulation(obstacles, lightForSim);
+            e.lightFrustra = run_light_simulation(obstacles, lightForSim);
 
+            //e.lightFrustra.push_back(LightFrustrum(Point(200,100),Segment(Point(300,200),Point(150,200)),Segment(Point(300,200),Point(150,200))));
+        //}
 	}
 }
 
@@ -184,8 +200,7 @@ void UpdateGame(void)
 void DrawGame(void)
 {
     BeginDrawing();
-
-        ClearBackground(BLACK);
+        ClearBackground(RAYWHITE);
 
         if (!gameOver)
         {
@@ -200,7 +215,7 @@ void DrawGame(void)
             if (pause) DrawText("GAME PAUSED", screenWidth/2 - MeasureText("GAME PAUSED", 40)/2, screenHeight/2 - 40, 40, GRAY);
         }
         else DrawText("PRESS [ENTER] TO PLAY AGAIN", GetScreenWidth()/2 - MeasureText("PRESS [ENTER] TO PLAY AGAIN", 20)/2, GetScreenHeight()/2 - 50, 20, GRAY);
-
+        
     EndDrawing();
 }
 

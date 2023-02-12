@@ -45,9 +45,35 @@ public:
     }
 
     bool segmentIsCloser(Segment seg1, Segment seg2){
-        if(sameSide(seg1,seg2.p1,foc) && sameSide(seg1,seg2.p2,foc)) return false;
-        if(!sameSide(seg2,seg1.p1,foc) && !sameSide(seg2,seg1.p2,foc)) return false;
-        return true;
+        //cout<<"seg1"<<" "<<seg1.p1<<" "<<seg1.p2<<endl;
+        //cout<<"seg2"<<" "<<seg2.p1<<" "<<seg2.p2<<endl;
+        float f11 = pointToFrac(seg1.p1);
+        float f12 = pointToFrac(seg1.p2);
+        if(f11>f12) swap(f11,f12);
+        float f21 = pointToFrac(seg2.p1);
+        float f22 = pointToFrac(seg2.p2);
+        if(f21>f22) swap(f21,f22);
+        if(f21<f11 && f11<f22 && sameSide(seg2,foc,seg1.p1)){
+            //cout<<"1"<<endl;
+            return true;
+        }
+        if(f21<f12 && f12<f22 && sameSide(seg2,foc,seg1.p2)){
+            //cout<<"2"<<endl;
+            return true;
+        }
+        if(f11<f21 && f21<f12 && !sameSide(seg1,foc,seg2.p1)){
+            //cout<<"3"<<endl;
+            return true;
+        }
+        if(f11<f22 && f22<f12 && !sameSide(seg1,foc,seg2.p2)){
+            //cout<<"4"<<endl;
+            return true;
+        }
+        return false;
+
+        // if(sameSide(seg1,seg2.p1,foc) && sameSide(seg1,seg2.p2,foc)) return false;
+        // if(!sameSide(seg2,seg1.p1,foc) && !sameSide(seg2,seg1.p2,foc)) return false;
+        // return true;
     }
 
     float pointToFrac(Point p){
@@ -94,6 +120,7 @@ public:
                 }
                 //cout<<"obs3"<<" "<<p1<<" "<<p2<<endl;
                 if(movedp1 || movedp2){
+                    //cout<<"ADD"<<endl;
                     clippedObstacles.push_back(ObstacleForSim(Segment(p1,p2), obstacle.type));
                 }
             }
@@ -104,9 +131,40 @@ public:
             
         }
 
-        sort(clippedObstacles.begin(),clippedObstacles.end(),[=](ObstacleForSim a,ObstacleForSim b) -> bool {
-            return segmentIsCloser(a.seg,b.seg);
-        });
+        // sort(clippedObstacles.begin(),clippedObstacles.end(),[=](ObstacleForSim a,ObstacleForSim b) -> bool {
+        //     return segmentIsCloser(a.seg,b.seg);
+        // });
+
+        //cout<<segmentIsCloser(clippedObstacles[1].seg,clippedObstacles[2].seg)<<endl;
+
+        vector<vector<int>> e(clippedObstacles.size());
+        vector<int> visited(clippedObstacles.size());
+        for(int i = 0; i<clippedObstacles.size();i++)
+            for(int j = 0; j<clippedObstacles.size();j++)
+                if(i!=j && segmentIsCloser(clippedObstacles[i].seg,clippedObstacles[j].seg))
+                    e[i].push_back(j);
+
+        vector<int> toposort;
+        std::function<void(int)> dfs;
+        dfs = [&visited,&e,&toposort,&dfs](int v){
+            if(visited[v]) return;
+            visited[v] = true;
+            for(auto u:e[v]) dfs(u);
+            toposort.push_back(v);
+        };
+        for(int i = 0; i<clippedObstacles.size();i++) dfs(i);
+
+        // for(int i = 0; i<clippedObstacles.size();i++){
+        //     for(int j = 0; j<clippedObstacles.size();j++)
+        //         cout<<segmentIsCloser(clippedObstacles[i].seg,clippedObstacles[j].seg);
+        //     cout<<endl;
+        // }
+        // cout<<"topo ";
+        // for(int i = 0; i<clippedObstacles.size();i++) cout<<toposort[i]<<" ";
+        // cout<<endl;
+
+        reverse(toposort.begin(),toposort.end());
+
 
         vector<LightFrustrum> lightOutput;
         vector<LightFrustrumForSim> newlightSims;
@@ -115,7 +173,10 @@ public:
         vector<pair<float,float>> activeIntervals;
         activeIntervals.push_back(pair<float,float>(0.0,1.0));
 
-        for(auto &obstacle : clippedObstacles){
+        for(int i : toposort){
+            auto obstacle = clippedObstacles[i];
+            //cout<<"obs"<<" "<<obstacle.seg.p1<<" "<<obstacle.seg.p2<<endl;
+                
             pair<float,float> obstInterval = {pointToFrac(obstacle.seg.p1),pointToFrac(obstacle.seg.p2)};
             
             vector<pair<float,float>> newActiveIntervals;
@@ -186,7 +247,7 @@ void test_simulation(){
     //lightForSim.draw();
     // for (auto light : lightSims)
     //     light.draw();
-    for (auto light : lightOutput)
-        light.draw();
+    // for (auto light : lightOutput)
+    //     light.draw();
 }
 

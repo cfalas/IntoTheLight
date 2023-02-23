@@ -124,7 +124,7 @@ void InitGame(void)
                 wall.rec.y = wallPixel*i;
                 wall.active = true;
                 wall.color = DARKGRAY;
-                wall.mirror = c == '*';
+                wall.mirror = false;//c == '*';
                 if (c == '#' || c == '*') {
                     e.walls.insert(wall);
                 }
@@ -153,6 +153,10 @@ void UpdateGame(void)
         }
         else{
             e.myMirrors.push_back(adding_mirror);
+            // while(e.myMirrors.size()>5){
+            //     e.myMirrors.erase(e.myMirrors.begin());
+            // }
+
             adding_mirror.active = false;
             angle = 0;
         }
@@ -265,7 +269,7 @@ void DrawGame(void)
         {
             e.draw();
 
-			if(adding_mirror.active) adding_mirror.draw();
+			if(adding_mirror.active) adding_mirror.draw(BLUE);
             
             DrawRectangleLinesEx({20, 20, screenWidth / 4, 20}, 5, {0, 0,0,120});
             DrawRectangle(20, 20, screenWidth / 4 * e.player.getHealth(), 20, {255, 0,0,120});

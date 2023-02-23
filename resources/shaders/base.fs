@@ -13,7 +13,7 @@ uniform vec2 focuspoints[MAX_FOCUSPOINTS];
 
 // NOTE: Add here your custom variables
 
-vec2 getData(int id) {
+vec2 getFocus(int id) {
     for (int i=0; i<MAX_FOCUSPOINTS; i++) {
         if (i == id) return focuspoints[i];
     }
@@ -21,7 +21,7 @@ vec2 getData(int id) {
 
 void main()
 {
-    float alph = 1.0/(distance(getData(int(fragColor.x*255.0)),fragPosition.xy)*0.005);
+    float alph = 1.0/((distance(getFocus(int(fragColor.x*255.0)),fragPosition.xy) - 200.0)*0.005);
     alph = alph*0.3;
     if(fragColor.y*255.0>0.5){
         gl_FragColor = vec4(1,0,0,alph);

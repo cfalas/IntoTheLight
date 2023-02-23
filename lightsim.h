@@ -23,10 +23,7 @@ public:
     LightFrustrum() : seg1(Point(0, 0), Point(0, 0)),seg2(Point(0, 0), Point(0, 0)){};
     
     void draw(unsigned char i, unsigned char color){
-        //cout<<foc<<" "<<seg1.p1<<" "<<seg1.p2<<" "<<seg2.p1<<" "<<seg2.p2<<endl;
-        //DrawCircle(foc.x,foc.y,5,BLUE);
         DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,color,0,255});
-        //DrawPolygon(seg1.p1,seg1.p2, seg2.p2,seg2.p1,{i,i,i,i});
     }
     friend std::ostream& operator<<(std::ostream& os, const LightFrustrum m){
         os << m.seg1.p1.x<<" "<<m.seg1.p1.y << " " << m.seg1.p2.x<<" "<<m.seg1.p2.y << " ";
@@ -160,7 +157,6 @@ public:
 
         for(auto &obstacle : clippedObstacles){
             if(foc.cross(obstacle.seg.p1,obstacle.seg.p2)<0) swap(obstacle.seg.p1,obstacle.seg.p2);
-            
         }
 
         // sort(clippedObstacles.begin(),clippedObstacles.end(),[=](ObstacleForSim a,ObstacleForSim b) -> bool {

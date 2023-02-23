@@ -127,10 +127,10 @@ class Player : public SolidObject{
         int numKeys = 0;
         speed.x = 0;
         speed.y = 0;
-		if (IsKeyDown(KEY_RIGHT)) speed.x += maxspeed, numKeys++;
-		if (IsKeyDown(KEY_LEFT)) speed.x -= maxspeed, numKeys++;
-		if (IsKeyDown(KEY_UP)) speed.y -= maxspeed, numKeys++;
-		if (IsKeyDown(KEY_DOWN)) speed.y += maxspeed, numKeys++;
+		if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) speed.x += maxspeed, numKeys++;
+		if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) speed.x -= maxspeed, numKeys++;
+		if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) speed.y -= maxspeed, numKeys++;
+		if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) speed.y += maxspeed, numKeys++;
         if (numKeys == 2){
             speed.x /= sqrt(2);
             speed.y /= sqrt(2);
@@ -179,8 +179,8 @@ class Mirror {
     public:
     bool active;
     Segment seg = Segment(Point(), Point());
-    void draw(){
-	    DrawLine(seg.p1.x, seg.p1.y, seg.p2.x, seg.p2.y, RED);
+    void draw(Color color){
+	    DrawLine(seg.p1.x, seg.p1.y, seg.p2.x, seg.p2.y, color);
     }
     friend std::ostream& operator<<(std::ostream& os, const Mirror m){
         os << m.seg.p1.x<<" "<<m.seg.p1.y << " " << m.seg.p2.x<<" "<<m.seg.p2.y;
@@ -216,8 +216,8 @@ class Environment{
     set<Wall> backgroundWalls;
     
     Environment()
-        : myStartingLight(Point(200,-100),Segment(Point(300,200),Point(150,200))),
-          oppStartingLight(Point(800,500),Segment(Point(750,450),Point(850,450))) {
+        : oppStartingLight(Point(200,-100),Segment(Point(275,150),Point(150,150))),
+          myStartingLight(Point(825,725),Segment(Point(775,475),Point(875,475))) {
         player.rec.x =  200;
         player.rec.y = 200;
         player.rec.width = 20;
@@ -243,8 +243,6 @@ class Environment{
         }
         BeginShaderMode(lightShader);
         BeginBlendMode(BLEND_ALPHA);
-        // rlSetBlendFactors(RLGL_SRC_ALPHA, RLGL_SRC_ALPHA, RLGL_MIN);
-        // rlSetBlendMode(BLEND_CUSTOM);
         for(int i = 0; i < lightFrustra.size(); i++){
             lightFrustra[i].draw(i,color);
         }
@@ -269,8 +267,8 @@ class Environment{
         if(opponent.alive() && player.alive())
             DrawTextureRec(light_mask.texture, (Rectangle){ 0, 0, (float)GetScreenWidth(), -(float)GetScreenHeight() }, {0,0}, WHITE);
         EndBlendMode();
-        for(Mirror mirror : myMirrors) mirror.draw();
-        for(Mirror mirror : oppMirrors) mirror.draw();
+        for(Mirror mirror : myMirrors) mirror.draw(BLUE);
+        for(Mirror mirror : oppMirrors) mirror.draw(RED);
 
     }
 
